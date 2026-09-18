@@ -7,6 +7,9 @@ import numpy as np
 from mediapipe.tasks import python 
 from mediapipe.tasks.python import vision 
 
+#Comunicación
+import socket
+
 cap = cv.VideoCapture(0) 
 if not cap.isOpened(): 
     print("No se pudo abrir la webcam") 
@@ -23,6 +26,11 @@ options = vision.HandLandmarkerOptions(base_options=base_options,num_hands=2, mi
                                        min_hand_presence_confidence=0.7, min_tracking_confidence=0.7 ) 
 detector = vision.HandLandmarker.create_from_options(options) 
 
+
+sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+serverAddressPort=("127.0.0.1",5052)
+
+
 #hand = mp_hands.Hands() 
 
 mp_hands = mp.tasks.vision.HandLandmarksConnections 
@@ -33,11 +41,13 @@ FONT_SIZE = 1
 FONT_THICKNESS = 1 
 HANDEDNESS_TEXT_COLOR = (88, 205, 54) # vibrant green 
 
+
 def draw_landmarks_on_image(rgb_image, detection_result): 
     hand_landmarks_list = detection_result.hand_landmarks 
     handedness_list = detection_result.handedness 
     annotated_image = np.copy(rgb_image) 
- 
+
+   
     # Loop through the detected hands to visualize. 
     for idx in range(len(hand_landmarks_list)): 
         hand_landmarks = hand_landmarks_list[idx] 
@@ -64,6 +74,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
                     FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv.LINE_AA) 
 
     return annotated_image 
+
 
 
 while cap.isOpened(): 
@@ -93,6 +104,10 @@ while cap.isOpened():
     if cv.waitKey(1) & 0xFF == ord('q'): 
 
             break 
+
+
+hand_landmarks_list = result.hand_landmarks 
+sock.sendto(str.encode(str(hand_landmarks_list)),serverAddressPort)
 
 cap.release() 
 
