@@ -6,7 +6,7 @@ from mediapipe.tasks.python import vision
 
 cap = cv.VideoCapture(0) 
 if not cap.isOpened(): 
-    print("Failed to open webcam") 
+    print("No se pudo abrir la webcam") 
     exit() 
 
 cap.set(cv.CAP_PROP_FRAME_WIDTH, 800) 
@@ -16,7 +16,8 @@ cap.set(cv.CAP_PROP_FRAME_HEIGHT, 800)
 #mp_drawing = mp.solutions.drawing_utils 
 
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task') 
-options = vision.HandLandmarkerOptions(base_options=base_options,num_hands=2) 
+options = vision.HandLandmarkerOptions(base_options=base_options,num_hands=2, min_hand_detection_confidence = 0.7, 
+                                       min_hand_presence_confidence=0.7, min_tracking_confidence=0.7 ) 
 detector = vision.HandLandmarker.create_from_options(options) 
 
 #hand = mp_hands.Hands() 
@@ -54,11 +55,11 @@ def draw_landmarks_on_image(rgb_image, detection_result):
         text_x = int(min(x_coordinates) * width) 
         text_y = int(min(y_coordinates) * height) - MARGIN 
 
-        # Draw handedness (left or right hand) on the image. 
-        cv.putText(annotated_image, f"{handedness[0].category_name}", 
-                    (text_x, text_y), cv.FONT_HERSHEY_DUPLEX, 
+        #if handedness[0].score > 0.85:
+            # Draw handedness (left or right hand) on the image. 
+        cv.putText(annotated_image, f"{handedness[0].category_name}{handedness[0].score}", (text_x, text_y), cv.FONT_HERSHEY_DUPLEX, 
                     FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv.LINE_AA) 
-        
+
     return annotated_image 
 
 
