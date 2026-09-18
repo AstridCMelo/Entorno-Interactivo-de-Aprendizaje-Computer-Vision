@@ -21,7 +21,7 @@ cap.set(cv.CAP_PROP_FRAME_HEIGHT, 800)
 #mp_hands = mp.solutions.hands 
 #mp_drawing = mp.solutions.drawing_utils 
 
-base_options = python.BaseOptions(model_asset_path='hand_landmarker.task') 
+base_options = python.BaseOptions(model_asset_path='Python/hand_landmarker.task') 
 options = vision.HandLandmarkerOptions(base_options=base_options,num_hands=2, min_hand_detection_confidence = 0.7, 
                                        min_hand_presence_confidence=0.7, min_tracking_confidence=0.7 ) 
 detector = vision.HandLandmarker.create_from_options(options) 
@@ -101,13 +101,15 @@ while cap.isOpened():
 
     #cv.imshow('Hand Detection', frame) 
 
+    hand_landmarks_list = result.hand_landmarks 
+    sock.sendto(str.encode(str(hand_landmarks_list)),serverAddressPort)
+
     if cv.waitKey(1) & 0xFF == ord('q'): 
 
             break 
 
 
-hand_landmarks_list = result.hand_landmarks 
-sock.sendto(str.encode(str(hand_landmarks_list)),serverAddressPort)
+
 
 cap.release() 
 
