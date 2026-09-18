@@ -1,3 +1,6 @@
+#.\visionProyect\Scripts\Activate.ps1
+#pip install -r requirements.txt
+# 
 import cv2 as cv 
 import mediapipe as mp 
 import numpy as np 
