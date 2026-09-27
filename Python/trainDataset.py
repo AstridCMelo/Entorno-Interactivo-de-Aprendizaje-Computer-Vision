@@ -6,6 +6,8 @@ import os
 from mediapipe.tasks import python 
 from mediapipe.tasks.python import vision 
 
+
+
 mp_hands = mp.tasks.vision.HandLandmarksConnections 
 mp_drawing = mp.tasks.vision.drawing_utils 
 mp_drawing_styles = mp.tasks.vision.drawing_styles 
@@ -53,7 +55,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
     return annotated_image 
 
-dir_path = "Python/Natural Hand Digits Dataset"
+dir_path = "Python/Natural Hand Digits Dataset/Natural Hand Digits Dataset"
 output_path = "Python/Drawing"
 os.makedirs(output_path, exist_ok=True)
 
@@ -70,7 +72,7 @@ for label in os.listdir(dir_path):
         os.makedirs(output_folder, exist_ok=True)
 
         for filename in os.listdir(folder_path):
-
+            print(f"Procesando: {label}/{filename}")
             landmarks = []
 
             image_path = os.path.join(folder_path, filename)
@@ -87,14 +89,38 @@ for label in os.listdir(dir_path):
             hand_landmarks_list = result.hand_landmarks
             handedness_list = result.handedness 
 
+            # 63 valores por mano
+            left_landmarks = [0.0] * 63
+            right_landmarks = [0.0] * 63
+
             for idx in range(len(hand_landmarks_list)): 
                 hand_landmarks = hand_landmarks_list[idx] 
-                handedness = handedness_list[idx] 
+                handedness = handedness_list[idx][0].category_name
+
+                current_landmarks = []
 
                 for landmark in hand_landmarks_list[idx]:
-                    landmarks.extend([landmark.x, landmark.y, landmark.z])
+                    current_landmarks.extend([landmark.x, landmark.y, landmark.z])
 
-            fila = [label, handedness[0].category_name] + landmarks
+                if handedness == "Left":
+                    left_landmarks = current_landmarks
+
+                elif handedness == "Right":
+                    right_landmarks = current_landmarks
+
+            if len(left_landmarks) != 63:
+                print(f"ERROR izquierda: {filename}")
+                continue
+
+            if len(right_landmarks) != 63:
+                print(f"ERROR derecha: {filename}")
+                continue
+
+            fila = [label] + left_landmarks + right_landmarks
+
+            print("Características:", len(fila) - 1)
+
+            mx_landmarks.append(fila)
             mx_landmarks.append(fila)
 
             #Dimensiones Bounding Box
@@ -143,10 +169,23 @@ for label in os.listdir(dir_path):
 
             #cv.imshow('Hand Detection', frame) 
 
+        import json
 
+        json_path = "Python/Models/mx_landmarks.json"
 
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(mx_landmarks, f, indent=4)
 
-
+        print("======================================")
+        print("DATASET TERMINADO")
+        print("======================================")
+        print(f"Total de muestras: {len(mx_landmarks)}")
+        print(f"JSON guardado en: {json_path}")
  
+
+
+
+
+
 
  
