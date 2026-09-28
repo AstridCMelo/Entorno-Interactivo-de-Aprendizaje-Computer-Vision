@@ -121,7 +121,6 @@ for label in os.listdir(dir_path):
             print("Características:", len(fila) - 1)
 
             mx_landmarks.append(fila)
-            mx_landmarks.append(fila)
 
             #Dimensiones Bounding Box
             height, width, _ = annotated_image.shape 
