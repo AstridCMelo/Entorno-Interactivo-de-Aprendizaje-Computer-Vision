@@ -55,8 +55,8 @@ if not cap.isOpened():
     print("No se pudo abrir la webcam")
     exit()
 
-cap.set(cv.CAP_PROP_FRAME_WIDTH, 800)
-cap.set(cv.CAP_PROP_FRAME_HEIGHT, 800)
+cap.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
 
 
 # ============================================================
@@ -70,6 +70,8 @@ while cap.isOpened():
     if not ret:
         print("No se pudo capturar el frame")
         break
+
+    frame = cv.flip(frame, 1)
 
     # BGR → RGB
     frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -99,12 +101,25 @@ while cap.isOpened():
 
         landmarks = []
 
+        landmarksTracking = []
+        contLandmark = 0
+
         for landmark in hand:
             landmarks.extend([
                 landmark.x,
                 landmark.y,
                 landmark.z
             ])
+
+            if contLandmark == 0 or contLandmark == 9:
+
+                landmarksTracking.extend([
+                landmark.x,
+                landmark.y,
+                landmark.z
+                ])
+
+            contLandmark+=1
 
         if handedness == "Left":
             left_landmarks = landmarks
@@ -158,7 +173,7 @@ while cap.isOpened():
         # ENVIAR A UNITY
         # ----------------------------------------------------
 
-        message = str(prediction)
+        message = str(prediction)+ "|" + str(landmarksTracking)
 
         sock.sendto(
             message.encode("utf-8"),

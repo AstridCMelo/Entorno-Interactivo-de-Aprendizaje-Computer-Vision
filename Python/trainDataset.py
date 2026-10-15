@@ -6,8 +6,6 @@ import os
 from mediapipe.tasks import python 
 from mediapipe.tasks.python import vision 
 
-
-
 mp_hands = mp.tasks.vision.HandLandmarksConnections 
 mp_drawing = mp.tasks.vision.drawing_utils 
 mp_drawing_styles = mp.tasks.vision.drawing_styles 
@@ -55,8 +53,8 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
     return annotated_image 
 
-dir_path = "Python/Natural Hand Digits Dataset/Natural Hand Digits Dataset"
-output_path = "Python/Drawing"
+dir_path = "Python/fractionGesture"
+output_path = "Python/Drawing2"
 os.makedirs(output_path, exist_ok=True)
 
 labels = []
@@ -170,7 +168,7 @@ for label in os.listdir(dir_path):
 
         import json
 
-        json_path = "Python/Models/mx_landmarks.json"
+        json_path = "Python/Models/mx_landmarks2.json"
 
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(mx_landmarks, f, indent=4)

@@ -18,6 +18,9 @@ public class UDPReceive : MonoBehaviour
     // Aquí se guardará el dígito recibido
     public int digit = -1;
 
+    // Guarda los landmark 0 y 9 para obtener la posicion de la mitad de la palma, y con ese actualizar el cursor
+    public string dataLandmarks = "[]";
+
     private bool running = true;
 
     void Start()
@@ -46,8 +49,28 @@ public class UDPReceive : MonoBehaviour
                 string message =
                     Encoding.UTF8.GetString(dataByte);
 
+                string predictionMessage = message;
+
+                string[] messages = message.Split('|');
+
+                if (messages != null)
+                {
+                    predictionMessage = messages[0];
+
+                    if(messages.Length > 1)
+                    {
+                        dataLandmarks = messages[1];
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning(
+                       "Mensaje recibido no válido: " + message
+                    );
+                }
+
                 // Intentar convertir el mensaje a número
-                if (int.TryParse(message, out int receivedDigit))
+                if (int.TryParse(predictionMessage, out int receivedDigit))
                 {
                     digit = receivedDigit;
 
