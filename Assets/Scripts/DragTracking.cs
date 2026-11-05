@@ -1,52 +1,61 @@
-using Unity.VisualScripting;
+
 using UnityEngine;
-using UnityEngine.InputSystem.EnhancedTouch;
+using System.Globalization;
 
 public class DragTracking : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-
     public UDPReceive udpReceive;
-    
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
     void Update()
     {
+        if (udpReceive == null)
+            return;
 
         string data = udpReceive.dataLandmarks;
 
         if (string.IsNullOrEmpty(data))
-        {
+            return;
 
-        }
-        else
-        {
-            print(data);
-            data = data.Remove(0, 1);
-            data = data.Remove(data.Length - 1, 1);
-            print(data);
+        data = data.Trim('[', ']');
 
-            string[] coordinates = data.Split(',');
+        string[] coordinates = data.Split(',');
 
-            //Se normaliza a coordenadas de panatalla
+        if (coordinates.Length < 5)
+            return;
 
-            float x0 = Mathf.Lerp(-25, 30, float.Parse(coordinates[0]));
-            float y0 = Mathf.Lerp(-15, 20,(1 - float.Parse(coordinates[1])));
-            float y9 = Mathf.Lerp(-15, 20, (1 - float.Parse(coordinates[4])));
+        float x, y0, y9;
 
-            //Se promedia el y de los landmarks 9 y 0 para hallar el centro de la palma,
-            //y de este ubicar el cursor
+        if (!float.TryParse(coordinates[0], NumberStyles.Float,
+            CultureInfo.InvariantCulture, out x))
+            return;
 
-            float center = (y9 + y0) / 2;
+        if (!float.TryParse(coordinates[1], NumberStyles.Float,
+            CultureInfo.InvariantCulture, out y0))
+            return;
 
-            transform.localPosition = new Vector3(x0, center, transform.localPosition.z);
-            Debug.Log(x0);
-            Debug.Log(center);
+        if (!float.TryParse(coordinates[4], NumberStyles.Float,
+            CultureInfo.InvariantCulture, out y9))
+            return;
 
-        }
+        // Coordenadas normalizadas
+        float x0 = -25f + (x * 55f);
+
+        float vertical0 = -15f + ((1f - y0) * 35f);
+        float vertical9 = -15f + ((1f - y9) * 35f);
+
+        float center = (vertical0 + vertical9) / 2f;
+
+        Vector3 nuevaPosicion = new Vector3(
+            x0,
+            center,
+            transform.localPosition.z
+        );
+
+        transform.localPosition = nuevaPosicion;
+
+        Debug.Log("X original: " + x);
+        Debug.Log("Y0 original: " + y0);
+        Debug.Log("Y9 original: " + y9);
+        Debug.Log("Nueva posición: " + nuevaPosicion);
     }
 }
