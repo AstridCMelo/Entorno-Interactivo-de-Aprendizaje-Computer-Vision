@@ -11,7 +11,7 @@ import joblib
 # RUTA DEL JSON
 # ============================================================
 
-json_path = "Python/Models/mx_landmarks.json"
+json_path = "Python/Models/mx_landmarks2.json"
 
 
 # ============================================================
@@ -40,12 +40,12 @@ for fila in data:
     label = fila[0]
 
     # Desde fila[1] empiezan:
-    # 63 landmarks de la mano izquierda
-    # 63 landmarks de la mano derecha
+    # 42 valores de la mano izquierda
+    # 42 valores de la mano derecha
     landmarks = fila[1:]
 
-    # Verificar que haya exactamente 126 características
-    if len(landmarks) != 126:
+    # Verificar que haya exactamente 84 características
+    if len(landmarks) != 84:
         print(
             f"ERROR: muestra con {len(landmarks)} características"
         )
@@ -86,7 +86,7 @@ print("Prueba:", len(X_test))
 # ============================================================
 
 model = RandomForestClassifier(
-    n_estimators=200,
+    n_estimators=50,
     random_state=42,
     n_jobs=-1
 )

@@ -6,6 +6,7 @@ import os
 from mediapipe.tasks import python 
 from mediapipe.tasks.python import vision 
 
+
 mp_hands = mp.tasks.vision.HandLandmarksConnections 
 mp_drawing = mp.tasks.vision.drawing_utils 
 mp_drawing_styles = mp.tasks.vision.drawing_styles 
@@ -53,7 +54,12 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 
     return annotated_image 
 
-dir_path = "Python/fractionGesture"
+
+dir_path = os.path.join(
+    "Python",
+    "fractionGesture",
+    "Natural Hand Digits Dataset"
+)
 output_path = "Python/Drawing2"
 os.makedirs(output_path, exist_ok=True)
 
@@ -87,9 +93,9 @@ for label in os.listdir(dir_path):
             hand_landmarks_list = result.hand_landmarks
             handedness_list = result.handedness 
 
-            # 63 valores por mano
-            left_landmarks = [0.0] * 63
-            right_landmarks = [0.0] * 63
+            # 42 valores por mano (21 landmarks × 2 coordenadas)
+            left_landmarks = [0.0] * 42
+            right_landmarks = [0.0] * 42
 
             for idx in range(len(hand_landmarks_list)): 
                 hand_landmarks = hand_landmarks_list[idx] 
@@ -98,7 +104,7 @@ for label in os.listdir(dir_path):
                 current_landmarks = []
 
                 for landmark in hand_landmarks_list[idx]:
-                    current_landmarks.extend([landmark.x, landmark.y, landmark.z])
+                    current_landmarks.extend([landmark.x, landmark.y])
 
                 if handedness == "Left":
                     left_landmarks = current_landmarks
@@ -106,11 +112,11 @@ for label in os.listdir(dir_path):
                 elif handedness == "Right":
                     right_landmarks = current_landmarks
 
-            if len(left_landmarks) != 63:
+            if len(left_landmarks) != 42:
                 print(f"ERROR izquierda: {filename}")
                 continue
 
-            if len(right_landmarks) != 63:
+            if len(right_landmarks) != 42:
                 print(f"ERROR derecha: {filename}")
                 continue
 

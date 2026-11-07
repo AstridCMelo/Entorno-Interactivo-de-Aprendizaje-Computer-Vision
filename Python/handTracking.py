@@ -8,6 +8,26 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
 
+import time
+
+
+# ============================================================
+# MEDICIÓN DE RENDIMIENTO
+# ============================================================
+
+tiempos = {
+    "captura": 0,
+    "conversion": 0,
+    "mediapipe": 0,
+    "clasificacion": 0,
+    "udp": 0,
+    "visualizacion": 0,
+    "total": 0
+}
+
+frames = 0
+inicio_medicion = time.perf_counter()
+
 # ============================================================
 # MODELO
 # ============================================================
@@ -55,8 +75,19 @@ if not cap.isOpened():
     print("No se pudo abrir la webcam")
     exit()
 
-cap.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
-cap.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
+cap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
+cap.set(cv.CAP_PROP_FPS, 30)
+
+cap.set(cv.CAP_PROP_BUFFERSIZE, 1)
+
+t0 = time.perf_counter()
+
+ret, frame = cap.read()
+
+tiempos["captura"] = (time.perf_counter() - t0) * 1000
+
+
 
 
 # ============================================================
@@ -85,13 +116,13 @@ while cap.isOpened():
     result = detector.detect(mp_image)
 
     # --------------------------------------------------------
-    # Crear 126 características
-    # izquierda = 63
-    # derecha = 63
+    # Crear 84 características
+    # izquierda = 42
+    # derecha = 42
     # --------------------------------------------------------
 
-    left_landmarks = [0.0] * 63
-    right_landmarks = [0.0] * 63
+    left_landmarks = [0.0] * 42
+    right_landmarks = [0.0] * 42
 
     for idx in range(len(result.hand_landmarks)):
 
@@ -107,8 +138,7 @@ while cap.isOpened():
         for landmark in hand:
             landmarks.extend([
                 landmark.x,
-                landmark.y,
-                landmark.z
+                landmark.y
             ])
 
             if contLandmark == 0 or contLandmark == 9:
@@ -141,11 +171,10 @@ while cap.isOpened():
             dtype=np.float32
         ).reshape(1, -1)
 
-        # Predicción
-        prediction = model.predict(X)[0]
-
-        # Confianza
         probabilities = model.predict_proba(X)[0]
+
+        prediction = model.classes_[np.argmax(probabilities)]
+
         confidence = np.max(probabilities)
 
         # Mostrar en pantalla
