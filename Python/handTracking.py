@@ -102,7 +102,6 @@ while cap.isOpened():
         print("No se pudo capturar el frame")
         break
 
-    frame = cv.flip(frame, 1)
 
     # BGR → RGB
     frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -121,55 +120,50 @@ while cap.isOpened():
     # derecha = 42
     # --------------------------------------------------------
 
-    left_landmarks = [0.0] * 42
-    right_landmarks = [0.0] * 42
-
-    for idx in range(len(result.hand_landmarks)):
-
-        hand = result.hand_landmarks[idx]
-
-        handedness = result.handedness[idx][0].category_name
-
-        landmarks = []
-
-        landmarksTracking = []
-        contLandmark = 0
-
-        for landmark in hand:
-            landmarks.extend([
-                landmark.x,
-                landmark.y
-            ])
-
-            if contLandmark == 0 or contLandmark == 9:
-
-                landmarksTracking.extend([
-                landmark.x,
-                landmark.y,
-                landmark.z
-                ])
-
-            contLandmark+=1
-
-        if handedness == "Left":
-            left_landmarks = landmarks
-
-        elif handedness == "Right":
-            right_landmarks = landmarks
-
-
-    # --------------------------------------------------------
-    # Solo predecir si hay al menos una mano
-    # --------------------------------------------------------
+    # ============================================================
+    # EXTRAER Y CLASIFICAR UNA MANO
+    # ============================================================
 
     if len(result.hand_landmarks) > 0:
 
-        features = left_landmarks + right_landmarks
+        hand = result.hand_landmarks[0]
 
+        handedness = result.handedness[0][0].category_name
+
+        # Referencia: muñeca
+        x_base = hand[0].x
+        y_base = hand[0].y
+
+        features = []
+        landmarksTracking = []
+
+        for idx, landmark in enumerate(hand):
+
+            # Coordenadas relativas a la muñeca
+            x = landmark.x - x_base
+            y = landmark.y - y_base
+
+            # Mismo flip que en trainDataset.py
+            if handedness == "Left":
+                x = -x
+
+            features.extend([x, y])
+
+            # Datos que se envían a Unity
+            if idx == 0 or idx == 9:
+
+                landmarksTracking.extend([
+                    landmark.x,
+                    landmark.y,
+                    landmark.z
+                ])
+
+        # Verificar las 42 características
         X = np.array(
-            features,
+            [features],
             dtype=np.float32
-        ).reshape(1, -1)
+        )
+
 
         probabilities = model.predict_proba(X)[0]
 
@@ -198,17 +192,13 @@ while cap.isOpened():
             2
         )
 
-        # ----------------------------------------------------
-        # ENVIAR A UNITY
-        # ----------------------------------------------------
-
-        message = str(prediction)+ "|" + str(landmarksTracking)
+        # Enviar a Unity
+        message = str(prediction) + "|" + str(landmarksTracking)
 
         sock.sendto(
             message.encode("utf-8"),
             serverAddressPort
         )
-
 
     else:
 
@@ -221,6 +211,7 @@ while cap.isOpened():
             (0, 0, 255),
             2
         )
+
 
 
     cv.imshow("Digit Recognition", frame)

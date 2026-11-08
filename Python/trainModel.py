@@ -11,7 +11,7 @@ import joblib
 # RUTA DEL JSON
 # ============================================================
 
-json_path = "Python/Models/mx_landmarks2.json"
+json_path = "Python/Models/mx_landmarks.json"
 
 
 # ============================================================
@@ -40,12 +40,12 @@ for fila in data:
     label = fila[0]
 
     # Desde fila[1] empiezan:
-    # 42 valores de la mano izquierda
-    # 42 valores de la mano derecha
+    # 21 valores de la mano izquierda
+    # 21 valores de la mano derecha
     landmarks = fila[1:]
 
     # Verificar que haya exactamente 84 características
-    if len(landmarks) != 84:
+    if len(landmarks) != 42:
         print(
             f"ERROR: muestra con {len(landmarks)} características"
         )
