@@ -151,6 +151,7 @@ GameObject:
   - component: {fileID: 1089309170510000258}
   - component: {fileID: -1619623198464720871}
   - component: {fileID: -5828073593953800685}
+  - component: {fileID: 765400135892895089}
   m_Layer: 0
   m_Name: Container
   m_TagString: Untagged
@@ -267,7 +268,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   uiManager: {fileID: 3974109162266081499}
   grid: {fileID: -5828073593953800685}
-  value: 1
+  value: 1000
 --- !u!114 &-5828073593953800685
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,6 +281,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd07d0aa59d0013489f46ede7217fa84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Testing
+--- !u!65 &765400135892895089
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4414605371158870825}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 9.999999, y: 5.0884676, z: 10.000001}
+  m_Center: {x: 0, y: 2.679702, z: -0.0000000055943756}
 --- !u!1 &6833315903307298776
 GameObject:
   m_ObjectHideFlags: 0
