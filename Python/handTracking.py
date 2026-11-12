@@ -6,6 +6,7 @@ import socket
 
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+from threadpoolctl import threadpool_limits
 
 
 import time
@@ -33,6 +34,10 @@ inicio_medicion = time.perf_counter()
 # ============================================================
 
 model = joblib.load("Python/Models/digit_model.joblib")
+
+# Limitar RandomForest a un solo hilo
+model.n_jobs = 1
+threadpool_limits(limits=1)
 
 print("Modelo cargado correctamente")
 
@@ -87,8 +92,12 @@ ret, frame = cap.read()
 
 tiempos["captura"] = (time.perf_counter() - t0) * 1000
 
+depth_suavizado = 0.0
 
-
+# Antes del while
+ultimo_tiempo_clasificacion = 0
+intervalo_clasificacion = 0.1  # 100 ms
+ultima_prediccion = -1
 
 # ============================================================
 # LOOP
@@ -128,6 +137,57 @@ while cap.isOpened():
 
         hand = result.hand_landmarks[0]
 
+
+        # ========================================================
+        # ESTIMACIÓN DE PROFUNDIDAD MEDIANTE LA PALMA
+        # ========================================================
+
+        h, w, _ = frame.shape
+
+        # Landmarks 5 y 17: extremos de la palma
+        punto5 = hand[5]
+        punto17 = hand[17]
+
+        # Convertir coordenadas normalizadas a píxeles
+        x5 = punto5.x * w
+        y5 = punto5.y * h
+
+        x17 = punto17.x * w
+        y17 = punto17.y * h
+
+        # Distancia euclidiana entre ambos puntos
+        palm_width = np.sqrt(
+            (x17 - x5)**2 +
+            (y17 - y5)**2
+        )
+
+        # ========================================================
+        # CALIBRACIÓN
+        # ========================================================
+
+        # Valores iniciales: debes medirlos con tu cámara
+        size_min = 60    # Palma alejada
+        size_max = 180   # Palma cercana
+
+        depth_raw = np.clip(
+            (palm_width - size_min) / (size_max - size_min),
+            0.0,
+            1.0
+        )
+
+        # ========================================================
+        # SUAVIZADO
+        # ========================================================
+
+        alpha = 0.25
+
+        depth_suavizado = (
+            alpha * depth_raw +
+            (1 - alpha) * depth_suavizado
+        )
+
+        depth = depth_suavizado
+
         handedness = result.handedness[0][0].category_name
 
         # Referencia: muñeca
@@ -164,6 +224,19 @@ while cap.isOpened():
             dtype=np.float32
         )
 
+        tiempo_actual = time.perf_counter()
+
+
+        if tiempo_actual - ultimo_tiempo_clasificacion >= intervalo_clasificacion:
+
+            probabilities = model.predict_proba(X)[0]
+
+            ultima_prediccion = model.classes_[np.argmax(probabilities)]
+
+            ultimo_tiempo_clasificacion = tiempo_actual
+
+        prediction = ultima_prediccion
+
 
         probabilities = model.predict_proba(X)[0]
 
@@ -193,7 +266,11 @@ while cap.isOpened():
         )
 
         # Enviar a Unity
-        message = str(prediction) + "|" + str(landmarksTracking)
+        message = (
+            str(prediction) + "|" +
+            str(landmarksTracking) + "|" +
+            str(float(depth))
+        )
 
         sock.sendto(
             message.encode("utf-8"),

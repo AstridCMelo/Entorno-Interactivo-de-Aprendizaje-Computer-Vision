@@ -6,6 +6,15 @@ public class DragTracking : MonoBehaviour
 {
     public UDPReceive udpReceive;
 
+    [Header("Posición en profundidad")]
+    public float zLejano = 0f;
+    public float zCercano = -5f;
+
+    [Header("Suavizado")]
+    public float suavizado = 8f;
+
+    private Vector3 posicionObjetivo;
+
     void Update()
     {
         if (udpReceive == null)
@@ -37,25 +46,31 @@ public class DragTracking : MonoBehaviour
             CultureInfo.InvariantCulture, out y9))
             return;
 
-        // Coordenadas normalizadas
-        float x0 = -25f + (x * 55f);
+        // Posición horizontal
+        float x0 = Mathf.Round(-25f + (x * 55f));
 
-        float vertical0 = -15f + ((1f - y0) * 35f);
-        float vertical9 = -15f + ((1f - y9) * 35f);
+        // Posición vertical
+        float vertical0 = Mathf.Round(-15f + ((1f - y0) * 35f));
+        float vertical9 = Mathf.Round(-15f + ((1f - y9) * 35f));
 
-        float center = (vertical0 + vertical9) / 2f;
+        float center = Mathf.Round((vertical0 + vertical9) / 2f);
 
-        Vector3 nuevaPosicion = new Vector3(
+        // Profundidad
+        float depth = Mathf.Clamp01(udpReceive.dataDepth);
+        float z = Mathf.Round(Mathf.Lerp(zLejano, zCercano, depth));
+
+        // Posición objetivo
+        posicionObjetivo = new Vector3(
             x0,
             center,
-            transform.localPosition.z
+            z
         );
 
-        transform.localPosition = nuevaPosicion;
-
-        Debug.Log("X original: " + x);
-        Debug.Log("Y0 original: " + y0);
-        Debug.Log("Y9 original: " + y9);
-        Debug.Log("Nueva posición: " + nuevaPosicion);
+        // Movimiento suavizado
+        transform.localPosition = Vector3.Lerp(
+            transform.localPosition,
+            posicionObjetivo,
+            suavizado * Time.deltaTime
+        );
     }
 }

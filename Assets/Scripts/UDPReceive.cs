@@ -5,6 +5,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Globalization;
 
 public class UDPReceive : MonoBehaviour
 {
@@ -12,14 +13,16 @@ public class UDPReceive : MonoBehaviour
     UdpClient client;
 
     public int port = 5052;
-
     public bool startReceiving = true;
 
-    // Aquí se guardará el dígito recibido
+    // Dígito clasificado
     public int digit = -1;
 
-    // Guarda los landmark 0 y 9 para obtener la posicion de la mitad de la palma, y con ese actualizar el cursor
+    // Landmarks 0 y 9
     public string dataLandmarks = "[]";
+
+    // Profundidad normalizada (0 a 1)
+    public float dataDepth = 0f;
 
     private bool running = true;
 
@@ -49,39 +52,33 @@ public class UDPReceive : MonoBehaviour
                 string message =
                     Encoding.UTF8.GetString(dataByte);
 
-                string predictionMessage = message;
-
                 string[] messages = message.Split('|');
 
-                if (messages != null)
+                if (messages.Length >= 3)
                 {
-                    predictionMessage = messages[0];
-
-                    if(messages.Length > 1)
+                    // 1. Recibir clasificación
+                    if (int.TryParse(messages[0], out int receivedDigit))
                     {
-                        dataLandmarks = messages[1];
+                        digit = receivedDigit;
+                    }
+
+                    // 2. Recibir landmarks
+                    dataLandmarks = messages[1];
+
+                    // 3. Recibir profundidad
+                    if (float.TryParse(
+                        messages[2],
+                        NumberStyles.Float,
+                        CultureInfo.InvariantCulture,
+                        out float receivedDepth))
+                    {
+                        dataDepth = Mathf.Clamp01(receivedDepth);
                     }
                 }
                 else
                 {
                     Debug.LogWarning(
-                       "Mensaje recibido no válido: " + message
-                    );
-                }
-
-                // Intentar convertir el mensaje a número
-                if (int.TryParse(predictionMessage, out int receivedDigit))
-                {
-                    digit = receivedDigit;
-
-                    Debug.Log(
-                        "Dígito recibido: " + digit
-                    );
-                }
-                else
-                {
-                    Debug.LogWarning(
-                        "Mensaje recibido no válido: " + message
+                        "Mensaje UDP incompleto: " + message
                     );
                 }
             }
@@ -89,9 +86,7 @@ public class UDPReceive : MonoBehaviour
             {
                 if (running)
                 {
-                    Debug.LogWarning(
-                        "UDP: " + err.Message
-                    );
+                    Debug.LogWarning("UDP: " + err.Message);
                 }
             }
         }
@@ -108,4 +103,3 @@ public class UDPReceive : MonoBehaviour
         }
     }
 }
-
