@@ -33,7 +33,8 @@ inicio_medicion = time.perf_counter()
 # ============================================================
 
 model = joblib.load("Python/Models/digit_model.joblib")
-
+#Para inferencia, al ser un solo frame es más optimo no paralelizar con -1
+model.set_params(n_jobs=1)
 print("Modelo cargado correctamente")
 
 
