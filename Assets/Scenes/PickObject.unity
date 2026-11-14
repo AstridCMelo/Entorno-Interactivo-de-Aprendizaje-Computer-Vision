@@ -476,6 +476,7 @@ GameObject:
   - component: {fileID: 1486097161}
   - component: {fileID: 1486097160}
   - component: {fileID: 1486097159}
+  - component: {fileID: 1486097162}
   m_Layer: 0
   m_Name: CursorTracking
   m_TagString: Untagged
@@ -499,6 +500,9 @@ MonoBehaviour:
   zLejano: 0
   zCercano: -5
   suavizado: 8
+  zonaMuerta: 0.01
+  camara: {fileID: 0}
+  margenPantalla: 0.03
 --- !u!212 &1486097160
 SpriteRenderer:
   serializedVersion: 2
@@ -573,6 +577,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1486097162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486097158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 926d5d8d0a530b54fb82d41dd3f1adac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectGrabController
+  udpReceive: {fileID: 382051872}
+  camara: {fileID: 1557008117}
+  tiempoParaAgarrar: 3
+  distanciaRaycast: 100
+  objetoAgarrado: 0
 --- !u!1 &1557008115
 GameObject:
   m_ObjectHideFlags: 0

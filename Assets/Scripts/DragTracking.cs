@@ -6,14 +6,36 @@ public class DragTracking : MonoBehaviour
 {
     public UDPReceive udpReceive;
 
-    [Header("Posición en profundidad")]
+    [Header("Posicion en profundidad")]
     public float zLejano = 0f;
     public float zCercano = -5f;
 
     [Header("Suavizado")]
-    public float suavizado = 8f;
+    public float suavizado = 4f;
+
+    [Header("Control de sensibilidad")]
+    [Range(0f, 0.1f)]
+    public float zonaMuerta = 0.01f;
+
+
+    [Header("Sensibilidad del cursor")]
+    [Range(0.1f, 1f)]
+    public float sensibilidadX = 0.5f;
+
+    [Range(0.1f, 1f)]
+    public float sensibilidadY = 0.5f;
+
+    [Header("Limites de pantalla")]
+    public Camera camara;
+    
+    [Range(0f, 0.1f)]
+    public float margenPantalla = 0.03f;
 
     private Vector3 posicionObjetivo;
+
+    // Ultima coordenada aceptada
+    private Vector2 ultimaEntrada;
+    private bool entradaInicializada = false;
 
     void Update()
     {
@@ -22,6 +44,7 @@ public class DragTracking : MonoBehaviour
 
         string data = udpReceive.dataLandmarks;
 
+        // Si no hay mano, conservar la ultima posicion
         if (string.IsNullOrEmpty(data))
             return;
 
@@ -34,43 +57,167 @@ public class DragTracking : MonoBehaviour
 
         float x, y0, y9;
 
-        if (!float.TryParse(coordinates[0], NumberStyles.Float,
+        if (!float.TryParse(coordinates[0],
+            NumberStyles.Float,
             CultureInfo.InvariantCulture, out x))
             return;
 
-        if (!float.TryParse(coordinates[1], NumberStyles.Float,
+        if (!float.TryParse(coordinates[1],
+            NumberStyles.Float,
             CultureInfo.InvariantCulture, out y0))
             return;
 
-        if (!float.TryParse(coordinates[4], NumberStyles.Float,
+        if (!float.TryParse(coordinates[4],
+            NumberStyles.Float,
             CultureInfo.InvariantCulture, out y9))
             return;
 
-        // Posición horizontal
-        float x0 = Mathf.Round(-25f + (x * 55f));
+        // =====================================
+        // 1. NORMALIZAR MOVIMIENTO HORIZONTAL
+        // =====================================
 
-        // Posición vertical
-        float vertical0 = Mathf.Round(-15f + ((1f - y0) * 35f));
-        float vertical9 = Mathf.Round(-15f + ((1f - y9) * 35f));
+        x = 1f - x;
 
-        float center = Mathf.Round((vertical0 + vertical9) / 2f);
+        // Centro vertical de landmarks 0 y 9
+        float y = (y0 + y9) / 2f;
 
-        // Profundidad
+        // =====================================
+        // 2. ZONA MUERTA
+        // =====================================
+
+        Vector2 entradaActual = new Vector2(x, y);
+
+        if (!entradaInicializada)
+        {
+            ultimaEntrada = entradaActual;
+            entradaInicializada = true;
+        }
+        else
+        {
+            float diferencia = Vector2.Distance(
+                entradaActual,
+                ultimaEntrada
+            );
+
+            if (diferencia >= zonaMuerta)
+            {
+                ultimaEntrada = entradaActual;
+            }
+        }
+
+        x = ultimaEntrada.x;
+        y = ultimaEntrada.y;
+
+        // =====================================
+        // 3. CONVERSION A COORDENADAS UNITY
+        // =====================================
+
+        // Centro del rango actual
+        float centroX = 2.5f;
+        float centroY = 2.5f;
+
+        // Movimiento relativo al centro
+        float x0 = centroX + ((x - 0.5f) * 55f * sensibilidadX);
+
+        float vertical0 = centroY +
+            ((0.5f - y) * 35f * sensibilidadY);
+
+        // =====================================
+        // 4. PROFUNDIDAD RELATIVA
+        // =====================================
+
         float depth = Mathf.Clamp01(udpReceive.dataDepth);
-        float z = Mathf.Round(Mathf.Lerp(zLejano, zCercano, depth));
 
-        // Posición objetivo
+        // Punto central de referencia
+        float profundidadMedia = 0.5f;
+
+        // Centro del recorrido en Unity
+        float zCentro = (zLejano + zCercano) / 2f;
+
+
+        // Desplazamiento respecto al centro
+        float desplazamientoZ = (depth - profundidadMedia) * 10f;
+
+        // Posición final
+        float z = Mathf.Clamp(
+            zCentro - desplazamientoZ,
+            zCercano,
+            zLejano
+        );
+
+        // =====================================
+        // 5. POSICION OBJETIVO
+        // =====================================
+
         posicionObjetivo = new Vector3(
             x0,
-            center,
+            vertical0,
             z
         );
 
-        // Movimiento suavizado
-        transform.localPosition = Vector3.Lerp(
+        // =====================================
+        // 6. MOVIMIENTO SUAVIZADO
+        // =====================================
+
+        Vector3 posicionSuavizada = Vector3.Lerp(
             transform.localPosition,
             posicionObjetivo,
             suavizado * Time.deltaTime
         );
+
+        // =====================================
+        // 7. LIMITES DE PANTALLA
+        // =====================================
+
+        transform.localPosition = LimitarPantalla(
+            posicionSuavizada
+        );
+    }
+
+    Vector3 LimitarPantalla(Vector3 posicionLocal)
+    {
+        if (camara == null)
+            return posicionLocal;
+
+        // Convertir de coordenadas locales a mundo
+        Vector3 posicionMundo = transform.parent != null
+            ? transform.parent.TransformPoint(posicionLocal)
+            : posicionLocal;
+
+        // Convertir a coordenadas de pantalla
+        Vector3 viewport = camara.WorldToViewportPoint(
+            posicionMundo
+        );
+
+        // No modificar si esta detras de la camara
+        if (viewport.z <= 0f)
+            return posicionLocal;
+
+        // Limitar los bordes
+        viewport.x = Mathf.Clamp(
+            viewport.x,
+            margenPantalla,
+            1f - margenPantalla
+        );
+
+        viewport.y = Mathf.Clamp(
+            viewport.y,
+            margenPantalla,
+            1f - margenPantalla
+        );
+
+        // Regresar a coordenadas del mundo
+        Vector3 posicionLimitada =
+            camara.ViewportToWorldPoint(viewport);
+
+        // Regresar a coordenadas locales
+        if (transform.parent != null)
+        {
+            return transform.parent.InverseTransformPoint(
+                posicionLimitada
+            );
+        }
+
+        return posicionLimitada;
     }
 }
