@@ -156,7 +156,7 @@ public class ObjectGrabController : MonoBehaviour
             transform.position + offsetObjeto;
     }
 
-    void SoltarObjeto()
+    public void SoltarObjeto()
     {
         if (objetoEnMano == null)
             return;
