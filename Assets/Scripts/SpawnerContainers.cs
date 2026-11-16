@@ -10,6 +10,10 @@ public class SpawnerContainers : MonoBehaviour
     [SerializeField] private float timeInteraction = 4f;
     [SerializeField] private spawnArea SpawnArea;
 
+    [SerializeField] private Renderer matButton;
+    [SerializeField] private Material normalMaterial;
+    [SerializeField] private Material hoverMaterial;
+
     public ObjectGrabController controllerCube;
 
     private void Start()
@@ -29,17 +33,20 @@ public class SpawnerContainers : MonoBehaviour
 
     IEnumerator Timer(Collider other)
     {
+        matButton.material = hoverMaterial;
         yield return new WaitForSeconds(timeInteraction);
 
-        var cubeOriginal = other.GetComponentInChildren<InteractableObject>();
+        var cubeOriginal = other.GetComponent<InteractableObject>();
 
         if (SOButton.value == cubeOriginal.value)
         {
             Debug.Log("Trigguer");
             controllerCube.SoltarObjeto();
-            SpawnArea.locate(cubeOriginal);
+            SpawnArea.defaultlocation(cubeOriginal);
             SpawnArea.SpawnCube(cubePrefab, SOButton);
         }
+
+        matButton.material = normalMaterial;
     }
 
 }

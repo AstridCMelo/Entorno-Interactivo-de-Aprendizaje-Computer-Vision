@@ -1,32 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public class spawnArea : MonoBehaviour
 {
-    List<InteractableObject> cubeGrid = new List<InteractableObject>();
+    readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
 
     int colGrid = 5;
     int rowGrid = 2;
     float offset = 1f;
 
-    bool[] full;
-
     public void SpawnCube(InteractableObject cubePrefab, SpawnerContainer SOButton)
     {
         if (cubeGrid.Count < colGrid * rowGrid)
         {
-            int i = cubeGrid.Count;
-            int col = i % colGrid;
-            int row = i / colGrid;
-
-            var cube2 = Instantiate(cubePrefab, new Vector3(transform.position.x + (row * offset), transform.position.y, transform.position.z + (col * offset)), Quaternion.identity);
+            var cube2 = Instantiate(cubePrefab);
             cube2.value = SOButton.value;
 
-            cubeGrid.Add(cube2);
+            defaultlocation(cube2);
+
+            //locate(cube2);
+            ////Debug.Log(cube2);
+            ////cubeGrid.Add(cube2);
         }
     }
 
-    public void locate(InteractableObject cubeOriginal)
+    public void locate(InteractableObject cube)
     {
         if (cubeGrid.Count < colGrid * rowGrid)
         {
@@ -34,21 +33,36 @@ public class spawnArea : MonoBehaviour
             int col = i % colGrid;
             int row = i / colGrid;
 
-            cubeOriginal.transform.position = new Vector3(transform.position.x + (row * offset), transform.position.y, transform.position.z + (col * offset));
-            cubeGrid.Add(cubeOriginal);
+            cube.transform.position = new Vector3(transform.position.x + (row * offset), transform.position.y, transform.position.z + (col * offset));
+            cubeGrid.Add(cube);
         }
     }
 
+    public void defaultlocation(InteractableObject cube)
+    {
+        cube.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+       var cube = other.GetComponent<InteractableObject>();
+       locate(cube);
+       Debug.Log("Cantidad en lista: " + cubeGrid.Count);
+    }
     public void OnTriggerExit(Collider other)
     {
-        int grabCube = cubeGrid.IndexOf(other.GetComponentInChildren<InteractableObject>());
-        cubeGrid.Remove(other.GetComponentInChildren<InteractableObject>());
+        //Debug.Log("Objeto del trigger: " + other.name);
+        int grabCube = cubeGrid.IndexOf(other.GetComponent<InteractableObject>());
 
-        for (int i = grabCube; i < cubeGrid.Count; i++)
+        if (grabCube >= 0)
         {
-            int col = i % colGrid;
-            int row = i / rowGrid;
-            cubeGrid[i].transform.position = transform.position + new Vector3(row * offset, 0, col * offset);
+            cubeGrid.RemoveAt(grabCube);
+            for (int i = grabCube; i < cubeGrid.Count; i++)
+            {
+                int col = i % colGrid;
+                int row = i / colGrid;
+                cubeGrid[i].transform.position = transform.position + new Vector3(row * offset, 0, col * offset);
+            }
         }
     }
 

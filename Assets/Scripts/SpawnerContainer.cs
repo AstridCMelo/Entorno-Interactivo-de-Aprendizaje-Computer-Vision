@@ -4,7 +4,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SpawnerContainer", menuName = "Scriptable Objects/SpawnerContainer")]
 public class SpawnerContainer : ScriptableObject
 {
-    public TextMeshProUGUI quantityText;
     public int value;
     public char symbolOperation;
 }
