@@ -5,5 +5,5 @@ using UnityEngine;
 public class SpawnerContainer : ScriptableObject
 {
     public int value;
-    public char symbolOperation;
+    public Material Normalmaterial;
 }

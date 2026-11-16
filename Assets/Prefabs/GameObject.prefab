@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7504811443239805179}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: InteractCube
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -125,6 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b3700812d9d4e945825d4a4e70a1d1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractableObject
+  SOButton: {fileID: 0}
   value: 1
 --- !u!1 &8699649522799903455
 GameObject:
@@ -136,7 +137,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4375239710466162058}
   - component: {fileID: 8215277095355944679}
-  - component: {fileID: -6874491214590374272}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: SpawnedCube
@@ -181,16 +181,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-6874491214590374272
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8699649522799903455}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b3700812d9d4e945825d4a4e70a1d1e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractableObject
-  value: 1

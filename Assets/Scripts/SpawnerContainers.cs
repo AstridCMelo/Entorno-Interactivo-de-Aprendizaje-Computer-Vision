@@ -11,32 +11,49 @@ public class SpawnerContainers : MonoBehaviour
     [SerializeField] private spawnArea SpawnArea;
 
     [SerializeField] private Renderer matButton;
-    [SerializeField] private Material normalMaterial;
     [SerializeField] private Material hoverMaterial;
+
+    [SerializeField] private TextButton buttonText;
 
     public ObjectGrabController controllerCube;
 
-    private void Start()
+    private void Awake()
     {
-        Debug.Log(SOButton.name);
+        if (SOButton != null)
+        {
+            matButton.material = SOButton.Normalmaterial;
+        }
+
+        buttonText.ExtractName(SOButton.value);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        StartCoroutine(Timer(other));
+        if (other == null) return;
+
+        if(other.CompareTag("InteractCube"))
+        {
+            var cubeOriginal = other.GetComponent<InteractableObject>();
+            if (SOButton.value == cubeOriginal.value)
+            {
+                StartCoroutine(Timer(cubeOriginal));
+            }
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        StopCoroutine(Timer(other));
+        if (other == null) return;
+
+        var cubeOriginal = other.GetComponent<InteractableObject>();
+
+        StopCoroutine(Timer(cubeOriginal));
     }
 
-    IEnumerator Timer(Collider other)
+    IEnumerator Timer(InteractableObject cubeOriginal)
     {
         matButton.material = hoverMaterial;
         yield return new WaitForSeconds(timeInteraction);
-
-        var cubeOriginal = other.GetComponent<InteractableObject>();
 
         if (SOButton.value == cubeOriginal.value)
         {
@@ -46,7 +63,7 @@ public class SpawnerContainers : MonoBehaviour
             SpawnArea.SpawnCube(cubePrefab, SOButton);
         }
 
-        matButton.material = normalMaterial;
+        matButton.material = SOButton.Normalmaterial;
     }
 
 }

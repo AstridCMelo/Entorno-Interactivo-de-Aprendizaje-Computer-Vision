@@ -1,16 +1,11 @@
+using TMPro;
 using UnityEngine;
 
 public class TextButton : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public TextMeshPro textButton;
+    public void ExtractName(int nameNumber)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        textButton.text = "+ " + nameNumber.ToString();
     }
 }

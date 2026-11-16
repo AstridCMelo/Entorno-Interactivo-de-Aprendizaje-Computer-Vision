@@ -15,7 +15,8 @@ public class spawnArea : MonoBehaviour
         if (cubeGrid.Count < colGrid * rowGrid)
         {
             var cube2 = Instantiate(cubePrefab);
-            cube2.value = SOButton.value;
+            cube2.SOButton = SOButton;
+            cube2.ChangeMat();
 
             defaultlocation(cube2);
 

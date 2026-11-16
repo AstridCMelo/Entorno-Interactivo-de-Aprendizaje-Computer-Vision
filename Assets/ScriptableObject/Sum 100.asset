@@ -10,8 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0801f4418c9e8948bc9e31396f6dcc5, type: 3}
-  m_Name: Sum One
+  m_Name: Sum 100
   m_EditorClassIdentifier: Assembly-CSharp::SpawnerContainer
-  quantityText: {fileID: 0}
-  value: 1
-  symbolOperation: 43
+  value: 100
+  Normalmaterial: {fileID: 2100000, guid: 9cdefc7c9affe5241802b2abf682f013, type: 2}
