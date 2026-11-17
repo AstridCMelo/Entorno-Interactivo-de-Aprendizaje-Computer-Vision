@@ -6,6 +6,14 @@ public class DragTracking : MonoBehaviour
 {
     public UDPReceive udpReceive;
 
+    [Header("Sprites del cursor")]
+    public SpriteRenderer spriteRenderer;
+
+    public Sprite spriteGesto0;
+    public Sprite spriteGesto5;
+
+    private int ultimoGesto = -1;
+
     [Header("Posicion en profundidad")]
     public float zLejano = 30f;
     public float zCercano = -30f;
@@ -36,9 +44,17 @@ public class DragTracking : MonoBehaviour
     // Ultima coordenada aceptada
     private Vector2 ultimaEntrada;
     private bool entradaInicializada = false;
+    
 
     void Update()
     {
+
+        if (spriteRenderer != null)
+        {
+            ActualizarSprite();
+        }
+
+        
         if (udpReceive == null)
             return;
 
@@ -220,4 +236,28 @@ public class DragTracking : MonoBehaviour
 
         return posicionLimitada;
     }
+
+
+    void ActualizarSprite()
+{
+    int gesto = udpReceive.digit;
+
+    Debug.Log("Gesto recibido: " + gesto);
+
+    if (gesto == ultimoGesto)
+        return;
+
+    ultimoGesto = gesto;
+
+    if (gesto == 0)
+    {
+        spriteRenderer.sprite = spriteGesto0;
+        Debug.Log("Sprite cambiado a gesto 0");
+    }
+    else if (gesto == 5)
+    {
+        spriteRenderer.sprite = spriteGesto5;
+        Debug.Log("Sprite cambiado a gesto 5");
+    }
+}
 }
