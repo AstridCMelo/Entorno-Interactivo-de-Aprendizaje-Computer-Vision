@@ -46,9 +46,13 @@ public class spawnArea : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
-       var cube = other.GetComponent<InteractableObject>();
-       locate(cube);
-       Debug.Log("Cantidad en lista: " + cubeGrid.Count);
+       if(other.CompareTag("InteractCube"))
+       {
+            var cube = other.GetComponent<InteractableObject>();
+            locate(cube);
+            Debug.Log("Cantidad en lista: " + cubeGrid.Count);
+       }
+       
     }
     public void OnTriggerExit(Collider other)
     {
