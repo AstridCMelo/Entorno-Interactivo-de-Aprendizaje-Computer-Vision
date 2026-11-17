@@ -5,11 +5,13 @@ using static UnityEngine.Rendering.DebugUI.Table;
 
 public class spawnArea : MonoBehaviour
 {
-    protected readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
+    public readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
 
     protected int colGrid = 5;
     protected int rowGrid = 2;
     protected float offset = 1f;
+
+    Transform transformTrigger;
 
     public void SpawnCube(InteractableObject cubePrefab, SpawnerContainer SOButton)
     {

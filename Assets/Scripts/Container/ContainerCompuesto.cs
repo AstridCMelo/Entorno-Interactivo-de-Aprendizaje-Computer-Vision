@@ -4,9 +4,10 @@ using UnityEngine;
 public class ContainerCompuesto : MonoBehaviour
 {
     public int containerRight;
+    public bool right = false;
+    public Container cont1;
+    public Container cont2;
 
-    [SerializeField] Container cont1;
-    [SerializeField] Container cont2;
 
     public void VerifyNumber()
     {
@@ -15,7 +16,15 @@ public class ContainerCompuesto : MonoBehaviour
         if(currentResult == containerRight)
         {
             Debug.Log("El sumando es correcto");
+            right = true;
+            OperationsManager.Instance.VerifyOperation();
         }
 
     }
+
+    //public void Relocate(Transform transform1, Transform transform2)
+    //{
+    //    cont1.RelocatetoResult(transform1);
+    //    cont2.RelocatetoResult(transform2);
+    //}
 }
