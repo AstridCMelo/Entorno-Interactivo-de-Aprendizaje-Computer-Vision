@@ -203,4 +203,14 @@ void DetectarObjeto()
 
         ActualizarOutline(null);
     }
+
+    public SpawnerContainer getObjetoMano()
+    {
+        if(objetoAgarrado == true)
+        {
+            return objetoEnMano.SOButton;
+        }
+
+        return null;
+    }
 }

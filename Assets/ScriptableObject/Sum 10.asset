@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0801f4418c9e8948bc9e31396f6dcc5, type: 3}
   m_Name: Sum 10
   m_EditorClassIdentifier: Assembly-CSharp::SpawnerContainer
-  quantityText: {fileID: 0}
-  value: 1
-  symbolOperation: 43
+  value: 10
+  Normalmaterial: {fileID: 2100000, guid: 252df61696511984591b89f5144b6f02, type: 2}
