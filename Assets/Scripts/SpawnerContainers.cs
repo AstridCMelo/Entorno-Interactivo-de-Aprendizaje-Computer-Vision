@@ -15,6 +15,8 @@ public class SpawnerContainers : MonoBehaviour
 
     [SerializeField] private TextButton buttonText;
 
+    private bool interaction = false;
+
     public ObjectGrabController controllerCube;
 
     private void Awake()
@@ -22,9 +24,18 @@ public class SpawnerContainers : MonoBehaviour
         if (SOButton != null)
         {
             matButton.material = SOButton.Normalmaterial;
+            buttonText.ExtractName(SOButton.value);
         }
+    }
 
-        buttonText.ExtractName(SOButton.value);
+    private void Update()
+    {
+       if(controllerCube.getObjetoMano() != null && (interaction == false))
+       {
+            SOButton = controllerCube.getObjetoMano();
+            matButton.material = SOButton.Normalmaterial;
+            buttonText.ExtractName(SOButton.value);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -48,13 +59,16 @@ public class SpawnerContainers : MonoBehaviour
         var cubeOriginal = other.GetComponent<InteractableObject>();
 
         StopCoroutine(Timer(cubeOriginal));
+        interaction = false;
     }
 
     IEnumerator Timer(InteractableObject cubeOriginal)
     {
+        interaction = true;
         matButton.material = hoverMaterial;
         yield return new WaitForSeconds(timeInteraction);
 
+        interaction = false;
         if (SOButton.value == cubeOriginal.value)
         {
             Debug.Log("Trigguer");

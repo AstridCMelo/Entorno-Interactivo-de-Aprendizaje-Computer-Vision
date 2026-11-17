@@ -181,4 +181,14 @@ public class ObjectGrabController : MonoBehaviour
         objetoAgarrado = false;
         tiempoSobreObjeto = 0f;
     }
+
+    public SpawnerContainer getObjetoMano()
+    {
+        if(objetoAgarrado == true)
+        {
+            return objetoEnMano.SOButton;
+        }
+
+        return null;
+    }
 }
