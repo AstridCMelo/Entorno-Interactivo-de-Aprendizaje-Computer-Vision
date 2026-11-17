@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static UnityEngine.Rendering.DebugUI.Table;
 
 public class spawnArea : MonoBehaviour
 {
-    readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
+    protected readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
 
-    int colGrid = 5;
-    int rowGrid = 2;
-    float offset = 1f;
+    protected int colGrid = 5;
+    protected int rowGrid = 2;
+    protected float offset = 1f;
 
     public void SpawnCube(InteractableObject cubePrefab, SpawnerContainer SOButton)
     {
@@ -44,7 +45,7 @@ public class spawnArea : MonoBehaviour
         cube.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
     }
 
-    public void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
        if(other.CompareTag("InteractCube"))
        {

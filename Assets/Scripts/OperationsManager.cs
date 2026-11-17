@@ -4,7 +4,10 @@ using UnityEngine.UI;
 
 public class OperationsManager : MonoBehaviour
 {
+    public static OperationsManager Instance { get; private set; }
+
     public TextMeshProUGUI operacionTexto;
+    public ContainerCompuesto[] containers;
 
     public int num1;
     public int num2;
@@ -30,6 +33,9 @@ public class OperationsManager : MonoBehaviour
     {
         num1 = Random(1,99);
         num2 = Random(1,99);
+
+        containers[0].containerRight = num1;
+        containers[1].containerRight = num2;
 
         operador = " + ";
 
