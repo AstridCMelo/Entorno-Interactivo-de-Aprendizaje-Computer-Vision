@@ -7,8 +7,8 @@ public class DragTracking : MonoBehaviour
     public UDPReceive udpReceive;
 
     [Header("Posicion en profundidad")]
-    public float zLejano = 0f;
-    public float zCercano = -5f;
+    public float zLejano = 30f;
+    public float zCercano = -30f;
 
     [Header("Suavizado")]
     public float suavizado = 4f;
@@ -140,7 +140,7 @@ public class DragTracking : MonoBehaviour
 
         // Posición final
         float z = Mathf.Clamp(
-            zCentro - desplazamientoZ,
+            zCentro + desplazamientoZ,
             zCercano,
             zLejano
         );

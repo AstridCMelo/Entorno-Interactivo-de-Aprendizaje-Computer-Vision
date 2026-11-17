@@ -26,91 +26,114 @@ public class ObjectGrabController : MonoBehaviour
 
     private Transform padreOriginal;
 
-    void Update()
+    // Referencia al contorno actual
+    private Outline outlineActual;
+
+   void Update()
+{
+    if (udpReceive == null || camara == null) return;
+
+    int gesto = udpReceive.digit;
+
+    if (gesto == 5 && objetoAgarrado)
     {
-        if (udpReceive == null || camara == null)
-            return;
+        SoltarObjeto();
+        return;
+    }
 
-        int gesto = udpReceive.digit;
+    if (objetoAgarrado)
+    {
+        MoverObjeto();
+        return;
+    }
 
-        // GESTO 5: SOLTAR
-        if (gesto == 5 && objetoAgarrado)
-        {
-            SoltarObjeto();
-            return;
-        }
+    if (gesto == 0)
+    {
+        DetectarObjeto();
+    }
+    else
+    {
+        objetoActual = null;
+        tiempoSobreObjeto = 0f;
+        ActualizarOutline(null);
+    }
+}
 
-        // Si ya tenemos un objeto, lo seguimos moviendo
-        if (objetoAgarrado)
-        {
-            MoverObjeto();
-            return;
-        }
+    [Header("Detección")]
+public float radioDeteccion = 0.15f;
 
-        // GESTO 0: INTENTAR AGARRAR
-        if (gesto == 0)
+void DetectarObjeto()
+{
+    Collider[] impactos = Physics.OverlapSphere(
+        transform.position,
+        radioDeteccion
+    );
+
+    InteractableObject objetoDetectado = null;
+    float distanciaCercana = float.MaxValue;
+
+    foreach (Collider impacto in impactos)
+    {
+        InteractableObject interactuable =
+            impacto.GetComponentInParent<InteractableObject>();
+
+        if (interactuable != null)
         {
-            DetectarObjeto();
-        }
-        else
-        {
-            objetoActual = null;
-            tiempoSobreObjeto = 0f;
+            float distancia = Vector3.Distance(
+                transform.position,
+                impacto.ClosestPoint(transform.position)
+            );
+
+            if (distancia < distanciaCercana)
+            {
+                objetoDetectado = interactuable;
+                distanciaCercana = distancia;
+            }
         }
     }
 
-    void DetectarObjeto()
+    if (objetoDetectado == null)
     {
-        // Obtener la posición del cursor en pantalla
-        Vector3 posicionPantalla =
-            camara.WorldToScreenPoint(transform.position);
+        objetoActual = null;
+        tiempoSobreObjeto = 0f;
+        ActualizarOutline(null);
+        return;
+    }
 
-        // Crear un rayo desde la cámara
-        Ray rayo = camara.ScreenPointToRay(posicionPantalla);
+    if (objetoActual != objetoDetectado)
+    {
+        objetoActual = objetoDetectado;
+        tiempoSobreObjeto = 0f;
+        ActualizarOutline(objetoActual);
+    }
 
-        RaycastHit[] impactos =
-            Physics.RaycastAll(rayo, distanciaRaycast);
+    tiempoSobreObjeto += Time.deltaTime;
 
-        // Buscar un objeto interactuable
-        InteractableObject objetoDetectado = null;
+    if (tiempoSobreObjeto >= tiempoParaAgarrar)
+    {
+        AgarrarObjeto(objetoActual);
+    }
+}
 
-        float distanciaCercana = float.MaxValue;
-
-        foreach (RaycastHit impacto in impactos)
+    // ACTIVAR Y DESACTIVAR OUTLINE
+    void ActualizarOutline(InteractableObject nuevoObjeto)
+    {
+        // Apagar contorno anterior
+        if (outlineActual != null)
         {
-            InteractableObject interactuable =
-                impacto.collider.GetComponentInParent<InteractableObject>();
-
-            if (interactuable != null &&
-                impacto.distance < distanciaCercana)
-            {
-                objetoDetectado = interactuable;
-                distanciaCercana = impacto.distance;
-            }
+            outlineActual.enabled = false;
+            outlineActual = null;
         }
 
-        // Si no encontramos ningún objeto
-        if (objetoDetectado == null)
-        {
-            objetoActual = null;
-            tiempoSobreObjeto = 0f;
+        if (nuevoObjeto == null)
             return;
-        }
 
-        // Si cambiamos de objeto, reiniciar contador
-        if (objetoActual != objetoDetectado)
+        // Buscar Outline en el objeto
+        outlineActual = nuevoObjeto.GetComponent<Outline>();
+
+        if (outlineActual != null)
         {
-            objetoActual = objetoDetectado;
-            tiempoSobreObjeto = 0f;
-        }
-
-        // Contabilizar tiempo sobre el objeto
-        tiempoSobreObjeto += Time.deltaTime;
-
-        // Comprobar si ya podemos agarrarlo
-        if (tiempoSobreObjeto >= tiempoParaAgarrar)
-        {
-            AgarrarObjeto(objetoActual);
+            outlineActual.enabled = true;
         }
     }
 
@@ -120,16 +143,15 @@ public class ObjectGrabController : MonoBehaviour
             return;
 
         objetoEnMano = objeto;
+        ActualizarOutline(objeto);
+   
         objetoAgarrado = true;
 
-        // Guardar posición relativa al cursor
         offsetObjeto =
             objeto.transform.position - transform.position;
 
-        // Guardar padre original
         padreOriginal = objeto.transform.parent;
 
-        // Si tiene Rigidbody, desactivar su física
         rbObjeto = objeto.GetComponent<Rigidbody>();
 
         if (rbObjeto != null)
@@ -161,10 +183,8 @@ public class ObjectGrabController : MonoBehaviour
         if (objetoEnMano == null)
             return;
 
-        // Restaurar padre original
         objetoEnMano.transform.SetParent(padreOriginal, true);
 
-        // Restaurar física
         if (rbObjeto != null)
         {
             rbObjeto.isKinematic = estadoKinematicAnterior;
@@ -180,5 +200,7 @@ public class ObjectGrabController : MonoBehaviour
 
         objetoAgarrado = false;
         tiempoSobreObjeto = 0f;
+
+        ActualizarOutline(null);
     }
 }
