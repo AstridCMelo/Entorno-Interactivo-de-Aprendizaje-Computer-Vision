@@ -23,7 +23,7 @@ public class SpawnerContainers : MonoBehaviour
     {
         if (SOButton != null)
         {
-            matButton.material = SOButton.Normalmaterial;
+            matButton.material = SOButton.NormalmaterialBoton;
             buttonText.ExtractName(SOButton.value);
         }
     }
