@@ -35,14 +35,14 @@ public class SpawnerContainers : MonoBehaviour
             SOButton = controllerCube.getObjetoMano();
             matButton.material = SOButton.NormalmaterialBoton;
             buttonText.ExtractName(SOButton.value);
-        }
+       }
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other == null) return;
 
-        if(other.CompareTag("InteractCube"))
+        if(other.CompareTag("SpawnedCube"))
         {
             var cubeOriginal = other.GetComponent<InteractableObject>();
             if (SOButton.value == cubeOriginal.value)

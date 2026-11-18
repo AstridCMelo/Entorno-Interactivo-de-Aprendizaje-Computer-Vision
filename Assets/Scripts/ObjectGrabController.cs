@@ -696,8 +696,9 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
 
     public SpawnerContainer getObjetoMano()
     {
-        if (objetoAgarrado && objetoEnMano != null)
+        if (objetoAgarrado == true && objetoEnMano != null)
         {
+            Debug.Log("Se obtuvo");
             return objetoEnMano.SOButton;
         }
 
