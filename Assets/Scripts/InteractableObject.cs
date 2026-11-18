@@ -11,7 +11,7 @@ public class InteractableObject : MonoBehaviour
 
     public void Awake()
     {
-        rendererCube = GetComponent<Renderer>();
+        rendererCube = GetComponentInChildren<Renderer>();
         ChangeMat();
     }
 
