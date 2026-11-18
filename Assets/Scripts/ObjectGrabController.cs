@@ -491,7 +491,7 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
     // CONEXIÓN FÍSICA
     // --------------------------------------------------
 
-    void ComprobarConexion()
+void ComprobarConexion()
     {
         if (objetoEnMano == null || rbObjeto == null)
             return;
@@ -512,6 +512,10 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
             if (posibleObjeto == null || posibleObjeto == objetoEnMano)
                 continue;
 
+            // Ambos cubos deben tener el mismo valor.
+            if (posibleObjeto.value != objetoEnMano.value)
+                continue;
+
             Rigidbody rbCandidato =
                 posibleObjeto.GetComponent<Rigidbody>();
 
@@ -519,8 +523,7 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
             if (rbCandidato == null)
                 continue;
 
-            // Evitar conectar objetos que ya pertenecen
-            // al mismo conjunto físico.
+            // Evitar conectar objetos del mismo conjunto físico.
             if (rbCandidato == rbObjeto)
                 continue;
 
@@ -565,6 +568,7 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
             ConectarObjetos(objetoEnMano, objetoDebajo);
         }
     }
+
 
     void ConectarObjetos(
         InteractableObject superior,
