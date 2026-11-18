@@ -2585,10 +2585,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectGrabController
   udpReceive: {fileID: 382051872}
   camara: {fileID: 1557008117}
-  tiempoParaAgarrar: 3
+  tiempoParaAgarrar: 1
   distanciaRaycast: 100
-  tiempoParaConectar: 5
-  radioDeteccionConexion: 0.5
+  tiempoParaConectar: 1
+  radioDeteccionConexion: 10
   objetoAgarrado: 0
   colorNormal: {r: 1, g: 1, b: 1, a: 1}
   colorConectando: {r: 0, g: 1, b: 0, a: 1}

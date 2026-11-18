@@ -9,11 +9,11 @@ public class ObjectGrabController : MonoBehaviour
     public Camera camara;
 
     [Header("Configuración")]
-    public float tiempoParaAgarrar = 3f;
+    public float tiempoParaAgarrar = 1f;
     public float distanciaRaycast = 100f;
 
     [Header("Conexión física")]
-    public float tiempoParaConectar = 3f;
+    public float tiempoParaConectar = 1f;
     public float radioDeteccionConexion = 10f;
 
     [Header("Estado")]
