@@ -9,7 +9,7 @@ public class spawnArea : MonoBehaviour
 
     protected int colGrid = 5;
     protected int rowGrid = 2;
-    protected float offset = 3f;
+    protected float offset = 1f;
 
     Transform transformTrigger;
 
@@ -49,7 +49,7 @@ public class spawnArea : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-       if(other.CompareTag("InteractCube"))
+       if(other.CompareTag("SpawnedCube"))
        {
             var cube = other.GetComponent<InteractableObject>();
             locate(cube);
