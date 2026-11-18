@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpawnerContainer
   value: 10
   Normalmaterial: {fileID: 2100000, guid: dc2fb5a97921ba44e91260055ed596bd, type: 2}
+  NormalmaterialBoton: {fileID: 2100000, guid: 252df61696511984591b89f5144b6f02, type: 2}
