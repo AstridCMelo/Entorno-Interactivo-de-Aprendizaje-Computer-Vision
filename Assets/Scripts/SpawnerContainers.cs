@@ -7,7 +7,7 @@ public class SpawnerContainers : MonoBehaviour
 {
     [SerializeField] private SpawnerContainer SOButton;
     [SerializeField] private InteractableObject cubePrefab;
-    [SerializeField] private float timeInteraction = 4f;
+    [SerializeField] private float timeInteraction = 2f;
     [SerializeField] private spawnArea SpawnArea;
 
     [SerializeField] private Renderer matButton;
@@ -47,6 +47,7 @@ public class SpawnerContainers : MonoBehaviour
             var cubeOriginal = other.GetComponent<InteractableObject>();
             if (SOButton.value == cubeOriginal.value)
             {
+                interaction = true;
                 StartCoroutine(Timer(cubeOriginal));
             }
         }
@@ -57,8 +58,8 @@ public class SpawnerContainers : MonoBehaviour
         if (other == null) return;
 
         var cubeOriginal = other.GetComponent<InteractableObject>();
-
-        StopCoroutine(Timer(cubeOriginal));
+        
+        StopAllCoroutines();
         interaction = false;
     }
 
@@ -68,8 +69,7 @@ public class SpawnerContainers : MonoBehaviour
         matButton.material = hoverMaterial;
         yield return new WaitForSeconds(timeInteraction);
 
-        interaction = false;
-        if (SOButton.value == cubeOriginal.value)
+        if (SOButton.value == cubeOriginal.value && interaction == true)
         {
             Debug.Log("Trigguer");
             controllerCube.SoltarObjeto();

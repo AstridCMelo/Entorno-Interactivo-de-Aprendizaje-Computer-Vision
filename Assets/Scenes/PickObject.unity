@@ -1519,17 +1519,6 @@ RectTransform:
   m_AnchoredPosition: {x: -659.24164, y: 357.08112}
   m_SizeDelta: {x: 247.3786, y: 81.2678}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &931153903 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7504811443239805179, guid: 0c5f84656ac796048907f0dc495685ca, type: 3}
-  m_PrefabInstance: {fileID: 1905847885}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b3700812d9d4e945825d4a4e70a1d1e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractableObject
 --- !u!1 &973191938
 GameObject:
   m_ObjectHideFlags: 0
@@ -3160,7 +3149,7 @@ PrefabInstance:
     - target: {fileID: 6646006740840724562, guid: 9c464a5fd92fbd64485ece1808a7be31, type: 3}
       propertyPath: cubePrefab
       value: 
-      objectReference: {fileID: 931153903}
+      objectReference: {fileID: 7430661217270765390, guid: 0c5f84656ac796048907f0dc495685ca, type: 3}
     - target: {fileID: 6646006740840724562, guid: 9c464a5fd92fbd64485ece1808a7be31, type: 3}
       propertyPath: controllerCube
       value: 

@@ -9,7 +9,7 @@ public class spawnArea : MonoBehaviour
 
     protected int colGrid = 5;
     protected int rowGrid = 2;
-    protected float offset = 1f;
+    protected float offset = 3f;
 
     Transform transformTrigger;
 
