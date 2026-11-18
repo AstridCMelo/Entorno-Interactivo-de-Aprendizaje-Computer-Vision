@@ -6,4 +6,6 @@ public class SpawnerContainer : ScriptableObject
 {
     public int value;
     public Material Normalmaterial;
+
+    public Material NormalmaterialBoton;
 }

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Sum 1000
   m_EditorClassIdentifier: Assembly-CSharp::SpawnerContainer
   value: 1000
-  Normalmaterial: {fileID: 2100000, guid: 47aefcd33fd3eec4a809c2dde070c9a3, type: 2}
+  Normalmaterial: {fileID: 2100000, guid: 562f9ae7351b31a4f83bda11fa38b03f, type: 2}

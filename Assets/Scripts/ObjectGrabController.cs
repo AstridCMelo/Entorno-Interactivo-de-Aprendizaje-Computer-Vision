@@ -1,5 +1,6 @@
 
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ObjectGrabController : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class ObjectGrabController : MonoBehaviour
     public float distanciaRaycast = 100f;
 
     [Header("Conexión física")]
-    public float tiempoParaConectar = 5f;
+    public float tiempoParaConectar = 3f;
     public float radioDeteccionConexion = 10f;
 
     [Header("Estado")]
@@ -41,6 +42,188 @@ public class ObjectGrabController : MonoBehaviour
     private Color colorOriginalOutline;
 
 
+
+    [Header("Indicador circular del cursor")]
+    public float tamanoIndicador = 75f;
+    public float transparenciaIndicador = 0.65f;
+    public Color colorIndicador = Color.white;
+    public Color colorIndicadorCompleto = Color.green;
+
+    private Canvas canvasIndicador;
+    private Image imagenProgreso;
+    private Image puntoCursor;
+
+
+
+void CrearIndicador()
+{
+    // Canvas que siempre se dibuja por encima de la escena.
+    GameObject canvasGO = new GameObject("CanvasIndicadorCursor");
+
+    canvasIndicador = canvasGO.AddComponent<Canvas>();
+    canvasIndicador.renderMode = RenderMode.ScreenSpaceOverlay;
+    canvasIndicador.sortingOrder = 32767;
+
+    canvasGO.AddComponent<UnityEngine.UI.CanvasScaler>();
+
+    // Imagen circular de progreso.
+    GameObject anilloGO = new GameObject("AnilloProgreso");
+    anilloGO.transform.SetParent(canvasGO.transform, false);
+
+    imagenProgreso = anilloGO.AddComponent<Image>();
+
+    imagenProgreso.sprite = CrearSpriteAnillo();
+    imagenProgreso.type = Image.Type.Filled;
+    imagenProgreso.fillMethod = Image.FillMethod.Radial360;
+    imagenProgreso.fillOrigin = (int)Image.Origin360.Top;
+    imagenProgreso.fillClockwise = true;
+    imagenProgreso.fillAmount = 0;
+
+    imagenProgreso.color = colorIndicador;
+
+    RectTransform rectAnillo =
+        imagenProgreso.rectTransform;
+
+    rectAnillo.sizeDelta =
+        new Vector2(tamanoIndicador, tamanoIndicador);
+
+    // Punto central del cursor.
+    GameObject puntoGO = new GameObject("PuntoCursor");
+    puntoGO.transform.SetParent(canvasGO.transform, false);
+
+    puntoCursor = puntoGO.AddComponent<Image>();
+    puntoCursor.sprite = CrearSpriteCirculo();
+
+    puntoCursor.color = new Color(
+        1f, 1f, 1f, transparenciaIndicador
+    );
+
+    puntoCursor.rectTransform.sizeDelta =
+        new Vector2(9f, 9f);
+
+    canvasGO.SetActive(false);
+}
+
+Sprite CrearSpriteAnillo()
+{
+    int resolucion = 128;
+    Texture2D textura = new Texture2D(
+        resolucion, resolucion,
+        TextureFormat.RGBA32, false
+    );
+
+    for (int y = 0; y < resolucion; y++)
+    {
+        for (int x = 0; x < resolucion; x++)
+        {
+            float dx = (x - resolucion / 2f) /
+                       (resolucion / 2f);
+
+            float dy = (y - resolucion / 2f) /
+                       (resolucion / 2f);
+
+            float distancia = Mathf.Sqrt(dx * dx + dy * dy);
+
+            bool dentro = distancia <= 0.95f &&
+                          distancia >= 0.78f;
+
+            textura.SetPixel(
+                x, y,
+                dentro ? Color.white : Color.clear
+            );
+        }
+    }
+
+    textura.Apply();
+
+    return Sprite.Create(
+        textura,
+        new Rect(0, 0, resolucion, resolucion),
+        new Vector2(0.5f, 0.5f)
+    );
+}
+
+Sprite CrearSpriteCirculo()
+{
+    int resolucion = 64;
+    Texture2D textura = new Texture2D(
+        resolucion, resolucion,
+        TextureFormat.RGBA32, false
+    );
+
+    for (int y = 0; y < resolucion; y++)
+    {
+        for (int x = 0; x < resolucion; x++)
+        {
+            float dx = (x - resolucion / 2f) /
+                       (resolucion / 2f);
+
+            float dy = (y - resolucion / 2f) /
+                       (resolucion / 2f);
+
+            float distancia = Mathf.Sqrt(dx * dx + dy * dy);
+
+            textura.SetPixel(
+                x, y,
+                distancia <= 0.9f ? Color.white : Color.clear
+            );
+        }
+    }
+
+    textura.Apply();
+
+    return Sprite.Create(
+        textura,
+        new Rect(0, 0, resolucion, resolucion),
+        new Vector2(0.5f, 0.5f)
+    );
+}
+
+
+void ActualizarIndicador()
+{
+    if (imagenProgreso == null)
+        return;
+
+    Vector3 posicionPantalla =
+        camara.WorldToScreenPoint(transform.position);
+
+    if (posicionPantalla.z <= 0)
+    {
+        canvasIndicador.gameObject.SetActive(false);
+        return;
+    }
+
+    canvasIndicador.gameObject.SetActive(true);
+
+    imagenProgreso.rectTransform.position =
+        posicionPantalla;
+
+    puntoCursor.rectTransform.position =
+        posicionPantalla;
+
+    float progreso = Mathf.Clamp01(
+        tiempoSobreObjeto / tiempoParaAgarrar
+    );
+
+    imagenProgreso.fillAmount = progreso;
+
+    imagenProgreso.color = Color.Lerp(
+        colorIndicador,
+        colorIndicadorCompleto,
+        progreso
+    );
+
+    Color color = imagenProgreso.color;
+    color.a = transparenciaIndicador;
+    imagenProgreso.color = color;
+}
+
+void OcultarIndicador()
+{
+    if (canvasIndicador != null)
+        canvasIndicador.gameObject.SetActive(false);
+}
 
 
 void AlinearObjetos(
@@ -96,7 +279,11 @@ void AlinearObjetos(
 }
 
 
-
+void Start()
+{
+    tiempoParaAgarrar = 3f;
+    CrearIndicador();
+}
     void Update()
     {
         if (udpReceive == null || camara == null)
@@ -135,6 +322,7 @@ void AlinearObjetos(
             objetoActual = null;
             tiempoSobreObjeto = 0f;
             ActualizarOutline(null);
+            OcultarIndicador();
         }
     }
 
@@ -208,10 +396,15 @@ void AlinearObjetos(
 
         tiempoSobreObjeto += Time.deltaTime;
 
-        if (tiempoSobreObjeto >= tiempoParaAgarrar)
-        {
-            AgarrarObjeto(objetoActual);
-        }
+// Actualizar el círculo de progreso.
+ActualizarIndicador();
+
+// Cuando se completa el círculo, agarrar.
+if (tiempoSobreObjeto >= tiempoParaAgarrar)
+{
+    OcultarIndicador();
+    AgarrarObjeto(objetoActual);
+}
     }
 
     // --------------------------------------------------
@@ -291,6 +484,7 @@ void AlinearObjetos(
         tiempoSobreObjeto = 0f;
 
         Debug.Log("Objeto agarrado: " + objeto.name);
+        OcultarIndicador();
     }
 
     // --------------------------------------------------

@@ -33,7 +33,7 @@ public class SpawnerContainers : MonoBehaviour
        if(controllerCube.getObjetoMano() != null && (interaction == false))
        {
             SOButton = controllerCube.getObjetoMano();
-            matButton.material = SOButton.Normalmaterial;
+            matButton.material = SOButton.NormalmaterialBoton;
             buttonText.ExtractName(SOButton.value);
         }
     }
@@ -77,7 +77,7 @@ public class SpawnerContainers : MonoBehaviour
             SpawnArea.SpawnCube(cubePrefab, SOButton);
         }
 
-        matButton.material = SOButton.Normalmaterial;
+        matButton.material = SOButton.NormalmaterialBoton;
     }
 
 }
