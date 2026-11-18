@@ -52,8 +52,6 @@ public class OperationsManager : MonoBehaviour
         UpdateInterface();
 
         resultado = num1 + num2;
-
-        containers[2].containerRight = resultado;
     }
 
     void Resta()
@@ -67,8 +65,6 @@ public class OperationsManager : MonoBehaviour
         {
             WinMessage();
             Debug.Log("Suma resuelta");
-            //containers[0].Relocate(containers[2].cont1.transform, containers[2].cont2.transform);
-            //containers[1].Relocate(containers[2].cont1.transform, containers[2].cont2.transform);
         }
     }
 
