@@ -4,9 +4,9 @@ using System.Globalization;
 
 public class DragTracking : MonoBehaviour
 {
-    public UDPReceive udpReceive;
+    //public UDPReceive udpReceive;
+    UDPReceive udpReceive => UDPReceive.Instance;
 
-    
 
     [Header("Sprites del cursor")]
     public SpriteRenderer spriteRenderer;

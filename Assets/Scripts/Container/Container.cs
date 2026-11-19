@@ -15,7 +15,7 @@ public class Container : spawnArea
     {
         colGrid = 3;
         rowGrid = 3;
-        offset = 1.5f;
+        offset = 0.5f;
         uiManager.ExtractName(SOButton.value);
     }
 
@@ -29,12 +29,13 @@ public class Container : spawnArea
 
     protected override void OnTriggerEnter(Collider other)
     {
-        controllerCube.SoltarObjeto();
+        //controllerCube.SoltarObjeto();
         base.OnTriggerEnter(other);
         numOperation = cubeGrid.Count * SOButton.value;
         Debug.Log(numOperation);
         contenedor.VerifyNumber();
     }
+
 
     public void RelocatetoResult(Transform transform)
     {

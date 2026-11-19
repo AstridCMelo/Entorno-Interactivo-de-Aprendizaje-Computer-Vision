@@ -55,14 +55,13 @@ public class spawnArea : MonoBehaviour
             locate(cube);
             Debug.Log("Cantidad en lista: " + cubeGrid.Count);
        }
-       
     }
-    public void OnTriggerExit(Collider other)
+    protected void OnTriggerExit(Collider other)
     {
         //Debug.Log("Objeto del trigger: " + other.name);
         int grabCube = cubeGrid.IndexOf(other.GetComponent<InteractableObject>());
 
-        if (grabCube >= 0)
+        if (grabCube >= 0 && other.CompareTag("SpawnedCube"))
         {
             cubeGrid.RemoveAt(grabCube);
             for (int i = grabCube; i < cubeGrid.Count; i++)
