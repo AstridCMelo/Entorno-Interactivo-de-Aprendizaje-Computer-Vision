@@ -28,7 +28,18 @@ def obtener_ruta_recurso(ruta):
     else:
         base = os.path.dirname(os.path.abspath(__file__))
 
-    return os.path.join(base, ruta)
+    posibles_rutas = [
+        os.path.join(base, ruta),
+        os.path.join(base, "_internal", ruta)
+    ]
+
+    for path in posibles_rutas:
+        if os.path.exists(path):
+            return path
+
+    raise FileNotFoundError(
+        f"No se encontró {ruta}. Rutas revisadas: {posibles_rutas}"
+    )
 
 
 # ============================================================
