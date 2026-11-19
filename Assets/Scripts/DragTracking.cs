@@ -6,58 +6,56 @@ public class DragTracking : MonoBehaviour
 {
     public UDPReceive udpReceive;
 
+    
+
     [Header("Sprites del cursor")]
     public SpriteRenderer spriteRenderer;
+
     public Sprite spriteGesto0;
     public Sprite spriteGesto5;
 
     private int ultimoGesto = -1;
 
+
     [Header("Mensajes")]
-    public TextAnimationController controladorTexto;
+public TextAnimationController controladorTexto;
 
-    private enum EstadoTutorial
-    {
-        EsperandoCentro,
-        EsperandoDialogoCentro,
-        EsperandoGestos,
-        EsperandoDialogoGestos,
-        MovimientoHorizontal,
-        EsperandoDialogoHorizontal,
-        MovimientoVertical,
-        EsperandoDialogoVertical,
-        MovimientoProfundidad,
-        EsperandoDialogoFinal,
-        Completado
-    }
+private bool manoDetectada = false;
+private bool gesto0Detectado = false;
+private bool gesto5Detectado = false;
+private bool gestosCompletados = false;
 
-    private EstadoTutorial estadoActual = EstadoTutorial.EsperandoCentro;
+private bool derechaDetectada = false;
+private bool izquierdaDetectada = false;
 
-    private bool mensajeCentroMostrado = false;
-    private bool manoCentrada = false;
+private bool arribaDetectada = false;
+private bool abajoDetectada = false;
 
-    private bool gesto0Detectado = false;
-    private bool gesto5Detectado = false;
+private bool adelanteDetectado = false;
+private bool atrasDetectado = false;
 
-    private bool derechaDetectada = false;
-    private bool izquierdaDetectada = false;
+private bool ejercicioHorizontal = false;
+private bool ejercicioVertical = false;
+private bool ejercicioProfundidad = false;
 
-    private bool arribaDetectada = false;
-    private bool abajoDetectada = false;
+private bool ejerciciosCompletados;
 
-    private bool adelanteDetectado = false;
-    private bool atrasDetectado = false;
+private bool bienvenidaMostrada = false;
 
-    [Header("Detección de movimientos")]
-    public float umbralMovimientoX = 0.08f;
-    public float umbralMovimientoY = 0.08f;
-    public float umbralMovimientoZ = 0.08f;
+private Vector3 posicionReferencia;
+private bool referenciaInicializada = false;
 
-    private bool referenciaMovimientoInicializada = false;
-    private Vector2 referenciaMovimientoXY;
-    private float referenciaMovimientoZ;
+[Header("Detección de movimientos")]
+private bool referenciaMovimientoInicializada = false;
 
-    [Header("Posición en profundidad")]
+private Vector2 referenciaMovimientoXY;
+private float referenciaMovimientoZ;
+
+public float umbralMovimientoX = 0.08f;
+public float umbralMovimientoY = 0.08f;
+public float umbralMovimientoZ = 0.08f;
+
+    [Header("Posicion en profundidad")]
     public float zLejano = 30f;
     public float zCercano = -30f;
 
@@ -68,6 +66,7 @@ public class DragTracking : MonoBehaviour
     [Range(0f, 0.1f)]
     public float zonaMuerta = 0.01f;
 
+
     [Header("Sensibilidad del cursor")]
     [Range(0.1f, 1f)]
     public float sensibilidadX = 0.5f;
@@ -75,63 +74,37 @@ public class DragTracking : MonoBehaviour
     [Range(0.1f, 1f)]
     public float sensibilidadY = 0.5f;
 
-    [Header("Límites de pantalla")]
+    [Header("Limites de pantalla")]
     public Camera camara;
-
+    
     [Range(0f, 0.1f)]
     public float margenPantalla = 0.03f;
 
     private Vector3 posicionObjetivo;
 
+    // Ultima coordenada aceptada
     private Vector2 ultimaEntrada;
     private bool entradaInicializada = false;
 
     [Header("Validación del centro")]
-    public float centroX = 0.5f;
-    public float centroY = 0.5f;
-    public float toleranciaCentro = 0.10f;
+public float centroX = 0.5f;
+public float centroY = 0.5f;
 
-    private void Start()
-    {
-        if (controladorTexto == null)
-        {
-            Debug.LogError("DragTracking: No se ha asignado TextAnimationController.");
-        }
+// Qué tan cerca debe estar la mano del centro
+public float toleranciaCentro = 0.10f;
 
-        if (udpReceive == null)
-        {
-            Debug.LogError("DragTracking: No se ha asignado UDPReceive.");
-        }
-    }
+private bool manoCentrada = false;
+    
+private bool mensajeCentroMostrado = false;
 
-    void MostrarMensaje(string id, string mensaje)
-    {
-        if (controladorTexto != null)
-        {
-            controladorTexto.MostrarMensajeUnaVez(id, mensaje);
-        }
-    }
-
-    bool DialogoTerminado()
-    {
-        return controladorTexto == null ||
-               !controladorTexto.EstaProcesandoCola;
-    }
-
-    // =====================================
-    // CENTRAR LA MANO
-    // =====================================
 
     void DetectarPrimeraMano(float x, float y)
     {
-        if (estadoActual != EstadoTutorial.EsperandoCentro)
-            return;
-
         if (!mensajeCentroMostrado)
         {
             mensajeCentroMostrado = true;
 
-            MostrarMensaje(
+            controladorTexto.MostrarMensajeUnaVez(
                 "centrar_mano",
                 "¡Coloca tu mano en el centro de la pantalla!"
             );
@@ -144,199 +117,123 @@ public class DragTracking : MonoBehaviour
         if (!estaEnCentro)
             return;
 
+        if (manoCentrada)
+            return;
+
         manoCentrada = true;
+        manoDetectada = true;
 
-        estadoActual = EstadoTutorial.EsperandoDialogoCentro;
-
-        MostrarMensaje(
+        controladorTexto.MostrarMensajeUnaVez(
             "mano_centrada",
             "¡Muy bien! Ahora abre y cierra tu mano."
         );
     }
 
-    // =====================================
-    // CONTROL DE LOS DIÁLOGOS
-    // =====================================
 
-    void ActualizarEstadoDialogos()
+
+void DetectarMovimientos(float x, float y, float z)
+{
+    if (!gestosCompletados || ejerciciosCompletados)
+        return;
+
+    Vector2 posicionActual = new Vector2(x, y);
+
+    // Establecer la primera posición de referencia
+    if (!referenciaMovimientoInicializada)
     {
-        if (!DialogoTerminado())
-            return;
+        referenciaMovimientoXY = posicionActual;
+        referenciaMovimientoZ = z;
+        referenciaMovimientoInicializada = true;
+        return;
+    }
 
-        switch (estadoActual)
+    float diferenciaX = x - referenciaMovimientoXY.x;
+    float diferenciaY = y - referenciaMovimientoXY.y;
+    float diferenciaZ = z - referenciaMovimientoZ;
+
+    // HORIZONTAL
+    if (!ejercicioHorizontal)
+    {
+        if (diferenciaX >= umbralMovimientoX)
+            derechaDetectada = true;
+
+        if (diferenciaX <= -umbralMovimientoX)
+            izquierdaDetectada = true;
+
+        if (derechaDetectada && izquierdaDetectada)
         {
-            case EstadoTutorial.EsperandoDialogoCentro:
+            ejercicioHorizontal = true;
 
-                estadoActual = EstadoTutorial.EsperandoGestos;
-                Debug.Log("Tutorial: esperando los gestos 0 y 5.");
-                break;
-
-            case EstadoTutorial.EsperandoDialogoGestos:
-
-                ReiniciarReferenciaMovimiento();
-                estadoActual = EstadoTutorial.MovimientoHorizontal;
-
-                Debug.Log("Tutorial: movimiento horizontal habilitado.");
-                break;
-
-            case EstadoTutorial.EsperandoDialogoHorizontal:
-
-                ReiniciarReferenciaMovimiento();
-                estadoActual = EstadoTutorial.MovimientoVertical;
-
-                Debug.Log("Tutorial: movimiento vertical habilitado.");
-                break;
-
-            case EstadoTutorial.EsperandoDialogoVertical:
-
-                ReiniciarReferenciaMovimiento();
-                estadoActual = EstadoTutorial.MovimientoProfundidad;
-
-                Debug.Log("Tutorial: movimiento de profundidad habilitado.");
-                break;
-
-            case EstadoTutorial.EsperandoDialogoFinal:
-
-                estadoActual = EstadoTutorial.Completado;
-
-                Debug.Log("Tutorial de movimientos completado.");
-                break;
+            controladorTexto.MostrarMensajeUnaVez(
+                "movimiento_horizontal",
+                "¡Eso! Ahora mueve tu mano de arriba a abajo."
+            );
         }
     }
 
-    // =====================================
-    // REINICIAR REFERENCIA DE MOVIMIENTO
-    // =====================================
-
-    void ReiniciarReferenciaMovimiento()
+    // VERTICAL
+    if (!ejercicioVertical)
     {
-        referenciaMovimientoInicializada = false;
-    }
+        if (diferenciaY >= umbralMovimientoY)
+            arribaDetectada = true;
 
-    // =====================================
-    // DETECTAR MOVIMIENTOS
-    // =====================================
+        if (diferenciaY <= -umbralMovimientoY)
+            abajoDetectada = true;
 
-    void DetectarMovimientos(float x, float y, float z)
-    {
-        if (!manoCentrada || !gesto0Detectado || !gesto5Detectado)
-            return;
-
-        if (!DialogoTerminado())
-            return;
-
-        Vector2 posicionActual = new Vector2(x, y);
-
-        // Establecer referencia al comenzar cada ejercicio
-        if (!referenciaMovimientoInicializada)
+        if (arribaDetectada && abajoDetectada)
         {
-            referenciaMovimientoXY = posicionActual;
-            referenciaMovimientoZ = z;
+            ejercicioVertical = true;
 
-            referenciaMovimientoInicializada = true;
-            return;
-        }
-
-        float diferenciaX = x - referenciaMovimientoXY.x;
-        float diferenciaY = y - referenciaMovimientoXY.y;
-        float diferenciaZ = z - referenciaMovimientoZ;
-
-        // =====================================
-        // MOVIMIENTO HORIZONTAL
-        // =====================================
-
-        if (estadoActual == EstadoTutorial.MovimientoHorizontal)
-        {
-            if (diferenciaX >= umbralMovimientoX)
-                derechaDetectada = true;
-
-            if (diferenciaX <= -umbralMovimientoX)
-                izquierdaDetectada = true;
-
-            if (derechaDetectada && izquierdaDetectada)
-            {
-                estadoActual = EstadoTutorial.EsperandoDialogoHorizontal;
-
-                MostrarMensaje(
-                    "movimiento_horizontal",
-                    "¡Eso! Ahora mueve tu mano de arriba a abajo."
-                );
-
-                Debug.Log("Movimiento horizontal completado.");
-            }
-
-            return;
-        }
-
-        // =====================================
-        // MOVIMIENTO VERTICAL
-        // =====================================
-
-        if (estadoActual == EstadoTutorial.MovimientoVertical)
-        {
-            if (diferenciaY >= umbralMovimientoY)
-                arribaDetectada = true;
-
-            if (diferenciaY <= -umbralMovimientoY)
-                abajoDetectada = true;
-
-            if (arribaDetectada && abajoDetectada)
-            {
-                estadoActual = EstadoTutorial.EsperandoDialogoVertical;
-
-                MostrarMensaje(
-                    "movimiento_vertical",
-                    "¡Excelente! Ahora mueve tu mano hacia delante y atrás."
-                );
-
-                Debug.Log("Movimiento vertical completado.");
-            }
-
-            return;
-        }
-
-        // =====================================
-        // MOVIMIENTO DE PROFUNDIDAD
-        // =====================================
-
-        if (estadoActual == EstadoTutorial.MovimientoProfundidad)
-        {
-            if (diferenciaZ >= umbralMovimientoZ)
-                adelanteDetectado = true;
-
-            if (diferenciaZ <= -umbralMovimientoZ)
-                atrasDetectado = true;
-
-            if (adelanteDetectado && atrasDetectado)
-            {
-                estadoActual = EstadoTutorial.EsperandoDialogoFinal;
-
-                MostrarMensaje(
-                    "movimiento_profundidad",
-                    "¡Excelente!"
-                );
-
-                MostrarMensaje(
-                    "ejercicios_completados",
-                    "¡Bien hecho! Ahora, intenta agarrar un objeto."
-                );
-
-                Debug.Log("Movimiento de profundidad completado.");
-            }
+            controladorTexto.MostrarMensajeUnaVez(
+                "movimiento_vertical",
+                "¡Excelente! Ahora mueve tu mano hacia delante y atrás."
+            );
         }
     }
 
-    // =====================================
-    // ACTUALIZACIÓN PRINCIPAL
-    // =====================================
+    // PROFUNDIDAD
+    if (!ejercicioProfundidad)
+    {
+        if (diferenciaZ >= umbralMovimientoZ)
+            adelanteDetectado = true;
+
+        if (diferenciaZ <= -umbralMovimientoZ)
+            atrasDetectado = true;
+
+        if (adelanteDetectado && atrasDetectado)
+        {
+            ejercicioProfundidad = true;
+
+            controladorTexto.MostrarMensajeUnaVez(
+                "movimiento_profundidad",
+                "¡Excelente!"
+            );
+        }
+    }
+
+    // COMPLETAR LOS TRES EJERCICIOS
+    if (ejercicioHorizontal &&
+        ejercicioVertical &&
+        ejercicioProfundidad)
+    {
+        ejerciciosCompletados = true;
+
+        controladorTexto.MostrarMensajeUnaVez(
+            "ejercicios_completados",
+            "¡Bien hecho! Ahora, intenta agarrar un objeto."
+        );
+    }
+}
+
 
     void Update()
-    {
+    {        
         if (udpReceive == null)
             return;
 
         string data = udpReceive.dataLandmarks;
 
+        // Si no hay mano, conservar la ultima posicion
         if (string.IsNullOrEmpty(data))
             return;
 
@@ -349,59 +246,42 @@ public class DragTracking : MonoBehaviour
 
         float x, y0, y9;
 
-        if (!float.TryParse(
-            coordinates[0],
+        if (!float.TryParse(coordinates[0],
             NumberStyles.Float,
-            CultureInfo.InvariantCulture,
-            out x))
+            CultureInfo.InvariantCulture, out x))
             return;
 
-        if (!float.TryParse(
-            coordinates[1],
+        if (!float.TryParse(coordinates[1],
             NumberStyles.Float,
-            CultureInfo.InvariantCulture,
-            out y0))
+            CultureInfo.InvariantCulture, out y0))
             return;
 
-        if (!float.TryParse(
-            coordinates[4],
+        if (!float.TryParse(coordinates[4],
             NumberStyles.Float,
-            CultureInfo.InvariantCulture,
-            out y9))
+            CultureInfo.InvariantCulture, out y9))
             return;
 
+         
         // =====================================
-        // 1. NORMALIZAR COORDENADAS
+        // 1. NORMALIZAR MOVIMIENTO HORIZONTAL
         // =====================================
 
         x = 1f - x;
 
+        // Centro vertical de landmarks 0 y 9
         float y = (y0 + y9) / 2f;
 
-        // =====================================
-        // 2. VALIDAR CENTRO
-        // =====================================
-
+        // Validar que la mano esté en el centro
         DetectarPrimeraMano(x, y);
 
-        // Actualizar el estado según los diálogos
-        ActualizarEstadoDialogos();
-
-        // =====================================
-        // 3. RECONOCER GESTOS
-        // =====================================
-
+        // Reconocer gestos solamente cuando la mano esté centrada
         if (manoCentrada && spriteRenderer != null)
         {
             ActualizarSprite();
         }
 
-        // Actualizar nuevamente por si se acaba de reconocer
-        // el último gesto y se ha iniciado un nuevo diálogo.
-        ActualizarEstadoDialogos();
-
         // =====================================
-        // 4. ZONA MUERTA
+        // 2. ZONA MUERTA
         // =====================================
 
         Vector2 entradaActual = new Vector2(x, y);
@@ -428,45 +308,52 @@ public class DragTracking : MonoBehaviour
         y = ultimaEntrada.y;
 
         // =====================================
-        // 5. CONVERSIÓN A COORDENADAS UNITY
+        // 3. CONVERSION A COORDENADAS UNITY
         // =====================================
 
-        float centroCursorX = 2.5f;
-        float centroCursorY = 2.5f;
+        // Centro del rango actual
+        float centroX = 2.5f;
+        float centroY = 2.5f;
 
-        float x0 = centroCursorX +
-            ((x - 0.5f) * 55f * sensibilidadX);
+        // Movimiento relativo al centro
+        float x0 = centroX + ((x - 0.5f) * 55f * sensibilidadX);
 
-        float vertical0 = centroCursorY +
+        float vertical0 = centroY +
             ((0.5f - y) * 35f * sensibilidadY);
 
         // =====================================
-        // 6. PROFUNDIDAD
+        // 4. PROFUNDIDAD RELATIVA
         // =====================================
 
         float depth = Mathf.Clamp01(udpReceive.dataDepth);
 
+        // Punto central de referencia
         float profundidadMedia = 0.5f;
 
+        // Centro del recorrido en Unity
         float zCentro = (zLejano + zCercano) / 2f;
 
-        float desplazamientoZ =
-            (depth - profundidadMedia) * 10f;
 
+        // Desplazamiento respecto al centro
+        float desplazamientoZ = (depth - profundidadMedia) * 10f;
+
+        // Posición final
         float z = Mathf.Clamp(
             zCentro + desplazamientoZ,
             zCercano,
             zLejano
         );
 
-        // =====================================
-        // 7. DETECCIÓN DEL EJERCICIO ACTUAL
-        // =====================================
+       // Los ejercicios solo comienzan cuando:
+        // 1. La mano está centrada.
+        // 2. Los dos gestos fueron reconocidos.
+        if (manoCentrada && gestosCompletados)
+        {
+            DetectarMovimientos(x, y, depth);
+        }
 
-        DetectarMovimientos(x, y, depth);
-
         // =====================================
-        // 8. POSICIÓN OBJETIVO DEL CURSOR
+        // 5. POSICION OBJETIVO
         // =====================================
 
         posicionObjetivo = new Vector3(
@@ -475,6 +362,10 @@ public class DragTracking : MonoBehaviour
             z
         );
 
+        // =====================================
+        // 6. MOVIMIENTO SUAVIZADO
+        // =====================================
+
         Vector3 posicionSuavizada = Vector3.Lerp(
             transform.localPosition,
             posicionObjetivo,
@@ -482,7 +373,7 @@ public class DragTracking : MonoBehaviour
         );
 
         // =====================================
-        // 9. LIMITAR PANTALLA
+        // 7. LIMITES DE PANTALLA
         // =====================================
 
         transform.localPosition = LimitarPantalla(
@@ -490,26 +381,26 @@ public class DragTracking : MonoBehaviour
         );
     }
 
-    // =====================================
-    // LIMITAR POSICIÓN EN PANTALLA
-    // =====================================
-
     Vector3 LimitarPantalla(Vector3 posicionLocal)
     {
         if (camara == null)
             return posicionLocal;
 
+        // Convertir de coordenadas locales a mundo
         Vector3 posicionMundo = transform.parent != null
             ? transform.parent.TransformPoint(posicionLocal)
             : posicionLocal;
 
+        // Convertir a coordenadas de pantalla
         Vector3 viewport = camara.WorldToViewportPoint(
             posicionMundo
         );
 
+        // No modificar si esta detras de la camara
         if (viewport.z <= 0f)
             return posicionLocal;
 
+        // Limitar los bordes
         viewport.x = Mathf.Clamp(
             viewport.x,
             margenPantalla,
@@ -522,9 +413,11 @@ public class DragTracking : MonoBehaviour
             1f - margenPantalla
         );
 
+        // Regresar a coordenadas del mundo
         Vector3 posicionLimitada =
             camara.ViewportToWorldPoint(viewport);
 
+        // Regresar a coordenadas locales
         if (transform.parent != null)
         {
             return transform.parent.InverseTransformPoint(
@@ -535,53 +428,62 @@ public class DragTracking : MonoBehaviour
         return posicionLimitada;
     }
 
-    // =====================================
-    // RECONOCIMIENTO DE GESTOS Y SPRITES
-    // =====================================
 
     void ActualizarSprite()
+{
+
+    if (!manoCentrada)
+    return;
+    int gesto = udpReceive.digit;
+
+
+
+    if (gesto == 0)
+    gesto0Detectado = true;
+
+    if (gesto == 5)
+        gesto5Detectado = true;
+
+    if (!gestosCompletados &&
+        gesto0Detectado &&
+        gesto5Detectado)
     {
-        if (!manoCentrada)
-            return;
+        gestosCompletados = true;
+        referenciaMovimientoInicializada = false;
 
-        int gesto = udpReceive.digit;
+        derechaDetectada = false;
+        izquierdaDetectada = false;
 
-        // Solo registrar los gestos durante su etapa.
-        if (estadoActual == EstadoTutorial.EsperandoGestos &&
-            DialogoTerminado())
-        {
-            if (gesto == 0)
-                gesto0Detectado = true;
+        arribaDetectada = false;
+        abajoDetectada = false;
 
-            if (gesto == 5)
-                gesto5Detectado = true;
+        adelanteDetectado = false;
+        atrasDetectado = false;
 
-            if (gesto0Detectado && gesto5Detectado)
-            {
-                estadoActual = EstadoTutorial.EsperandoDialogoGestos;
-
-                MostrarMensaje(
-                    "gestos_reconocidos",
-                    "¡Muy bien! Ahora mueve tu mano de izquierda a derecha."
-                );
-
-                Debug.Log("Gestos 0 y 5 reconocidos.");
-            }
-        }
-
-        // Actualizar el sprite aunque el tutorial esté mostrando diálogos.
-        if (gesto == ultimoGesto)
-            return;
-
-        ultimoGesto = gesto;
-
-        if (gesto == 0 && spriteGesto0 != null)
-        {
-            spriteRenderer.sprite = spriteGesto0;
-        }
-        else if (gesto == 5 && spriteGesto5 != null)
-        {
-            spriteRenderer.sprite = spriteGesto5;
-        }
+        controladorTexto.MostrarMensajeUnaVez(
+            "gestos_reconocidos",
+            "¡Muy bien! Ahora mueve tu mano de izquierda a derecha."
+        );
     }
+
+
+
+    Debug.Log("Gesto recibido: " + gesto);
+
+    if (gesto == ultimoGesto)
+        return;
+
+    ultimoGesto = gesto;
+
+    if (gesto == 0)
+    {
+        spriteRenderer.sprite = spriteGesto0;
+        Debug.Log("Sprite cambiado a gesto 0");
+    }
+    else if (gesto == 5)
+    {
+        spriteRenderer.sprite = spriteGesto5;
+        Debug.Log("Sprite cambiado a gesto 5");
+    }
+}
 }
