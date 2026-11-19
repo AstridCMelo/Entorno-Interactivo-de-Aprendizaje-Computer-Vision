@@ -11,6 +11,25 @@ from threadpoolctl import threadpool_limits
 
 import time
 
+import os
+import sys
+import ctypes
+
+
+def reportar_progreso(porcentaje, mensaje):
+    print(
+        f"PROGRESS|{porcentaje}|{mensaje}",
+        flush=True
+    )
+
+def obtener_ruta_recurso(ruta):
+    if hasattr(sys, '_MEIPASS'):
+        base = sys._MEIPASS
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base, ruta)
+
 
 # ============================================================
 # MEDICIÓN DE RENDIMIENTO
@@ -29,11 +48,20 @@ tiempos = {
 frames = 0
 inicio_medicion = time.perf_counter()
 
+
+# ============================================================
+# INICIALIZACIÓN
+# ============================================================
+
+    
 # ============================================================
 # MODELO
 # ============================================================
+reportar_progreso(10, "Cargando modelo de gestos...")
+model = joblib.load(
+    obtener_ruta_recurso("Models/digit_model.joblib")
+)
 
-model = joblib.load("Python/Models/digit_model.joblib")
 
 # Limitar RandomForest a un solo hilo
 model.n_jobs = 1
@@ -45,9 +73,11 @@ print("Modelo cargado correctamente")
 # ============================================================
 # MEDIAPIPE
 # ============================================================
-
+reportar_progreso(40, "Inicializando MediaPipe...")
 base_options = python.BaseOptions(
-    model_asset_path="Python/hand_landmarker.task"
+    model_asset_path=obtener_ruta_recurso(
+        "hand_landmarker.task"
+    )
 )
 
 options = vision.HandLandmarkerOptions(
@@ -64,7 +94,7 @@ detector = vision.HandLandmarker.create_from_options(options)
 # ============================================================
 # UDP
 # ============================================================
-
+reportar_progreso(70, "Conectando...")
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 serverAddressPort = ("127.0.0.1", 5052)
@@ -73,7 +103,7 @@ serverAddressPort = ("127.0.0.1", 5052)
 # ============================================================
 # WEBCAM
 # ============================================================
-
+reportar_progreso(80, "Accediendo a la cámara...")
 cap = cv.VideoCapture(0)
 
 if not cap.isOpened():
@@ -99,204 +129,255 @@ ultimo_tiempo_clasificacion = 0
 intervalo_clasificacion = 0.1  # 100 ms
 ultima_prediccion = -1
 
+reportar_progreso(100, "Sistema listo")
+
 # ============================================================
 # LOOP
 # ============================================================
+# ============================================================
+# CONFIGURACIÓN DE VENTANA DE CÁMARA
+# ============================================================
 
-while cap.isOpened():
+nombre_ventana = "Digit Recognition"
 
-    ret, frame = cap.read()
+ancho_ventana = 400
+alto_ventana = 300
+margen = 20
 
-    if not ret:
-        print("No se pudo capturar el frame")
-        break
+cv.namedWindow(nombre_ventana, cv.WINDOW_NORMAL)
+
+cv.resizeWindow(
+    nombre_ventana,
+    ancho_ventana,
+    alto_ventana
+)
+
+# Obtener resolución real de la pantalla de Windows
+ancho_pantalla = ctypes.windll.user32.GetSystemMetrics(0)
+alto_pantalla = ctypes.windll.user32.GetSystemMetrics(1)
+
+# Calcular posición inferior derecha
+posicion_x = ancho_pantalla - ancho_ventana - margen
+posicion_y = alto_pantalla - alto_ventana - margen - 40
+
+cv.moveWindow(
+    nombre_ventana,
+    posicion_x,
+    posicion_y
+)
+try:
+    while cap.isOpened():
+
+        ret, frame = cap.read()
+
+        if not ret:
+            print("No se pudo capturar el frame")
+            break
 
 
-    # BGR → RGB
-    frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        # BGR → RGB
+        frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
-    mp_image = mp.Image(
-        image_format=mp.ImageFormat.SRGB,
-        data=frame_rgb
-    )
-
-    # Detectar manos
-    result = detector.detect(mp_image)
-
-    # --------------------------------------------------------
-    # Crear 84 características
-    # izquierda = 42
-    # derecha = 42
-    # --------------------------------------------------------
-
-    # ============================================================
-    # EXTRAER Y CLASIFICAR UNA MANO
-    # ============================================================
-
-    if len(result.hand_landmarks) > 0:
-
-        hand = result.hand_landmarks[0]
-
-
-        # ========================================================
-        # ESTIMACIÓN DE PROFUNDIDAD MEDIANTE LA PALMA
-        # ========================================================
-
-        h, w, _ = frame.shape
-
-        # Landmarks 5 y 17: extremos de la palma
-        punto5 = hand[5]
-        punto17 = hand[17]
-
-        # Convertir coordenadas normalizadas a píxeles
-        x5 = punto5.x * w
-        y5 = punto5.y * h
-
-        x17 = punto17.x * w
-        y17 = punto17.y * h
-
-        # Distancia euclidiana entre ambos puntos
-        palm_width = np.sqrt(
-            (x17 - x5)**2 +
-            (y17 - y5)**2
+        mp_image = mp.Image(
+            image_format=mp.ImageFormat.SRGB,
+            data=frame_rgb
         )
 
-        # ========================================================
-        # CALIBRACIÓN
-        # ========================================================
+        # Detectar manos
+        result = detector.detect(mp_image)
 
-        # Valores iniciales: debes medirlos con tu cámara
-        size_min = 60    # Palma alejada
-        size_max = 180   # Palma cercana
+        # --------------------------------------------------------
+        # Crear 84 características
+        # izquierda = 42
+        # derecha = 42
+        # --------------------------------------------------------
 
-        depth_raw = np.clip(
-            (palm_width - size_min) / (size_max - size_min),
-            0.0,
-            1.0
-        )
+        # ============================================================
+        # EXTRAER Y CLASIFICAR UNA MANO
+        # ============================================================
 
-        # ========================================================
-        # SUAVIZADO
-        # ========================================================
+        if len(result.hand_landmarks) > 0:
 
-        alpha = 0.25
-
-        depth_suavizado = (
-            alpha * depth_raw +
-            (1 - alpha) * depth_suavizado
-        )
-
-        depth = depth_suavizado
-
-        handedness = result.handedness[0][0].category_name
-
-        # Referencia: muñeca
-        x_base = hand[0].x
-        y_base = hand[0].y
-
-        features = []
-        landmarksTracking = []
-
-        for idx, landmark in enumerate(hand):
-
-            # Coordenadas relativas a la muñeca
-            x = landmark.x - x_base
-            y = landmark.y - y_base
-
-            # Mismo flip que en trainDataset.py
-            if handedness == "Left":
-                x = -x
-
-            features.extend([x, y])
-
-            # Datos que se envían a Unity
-            if idx == 0 or idx == 9:
-
-                landmarksTracking.extend([
-                    landmark.x,
-                    landmark.y,
-                    landmark.z
-                ])
-
-        # Verificar las 42 características
-        X = np.array(
-            [features],
-            dtype=np.float32
-        )
-
-        tiempo_actual = time.perf_counter()
+            hand = result.hand_landmarks[0]
 
 
-        if tiempo_actual - ultimo_tiempo_clasificacion >= intervalo_clasificacion:
+            # ========================================================
+            # ESTIMACIÓN DE PROFUNDIDAD MEDIANTE LA PALMA
+            # ========================================================
+
+            h, w, _ = frame.shape
+
+            # Landmarks 5 y 17: extremos de la palma
+            punto5 = hand[5]
+            punto17 = hand[17]
+
+            # Convertir coordenadas normalizadas a píxeles
+            x5 = punto5.x * w
+            y5 = punto5.y * h
+
+            x17 = punto17.x * w
+            y17 = punto17.y * h
+
+            # Distancia euclidiana entre ambos puntos
+            palm_width = np.sqrt(
+                (x17 - x5)**2 +
+                (y17 - y5)**2
+            )
+
+            # ========================================================
+            # CALIBRACIÓN
+            # ========================================================
+
+            # Valores iniciales: debes medirlos con tu cámara
+            size_min = 60    # Palma alejada
+            size_max = 180   # Palma cercana
+
+            depth_raw = np.clip(
+                (palm_width - size_min) / (size_max - size_min),
+                0.0,
+                1.0
+            )
+
+            # ========================================================
+            # SUAVIZADO
+            # ========================================================
+
+            alpha = 0.25
+
+            depth_suavizado = (
+                alpha * depth_raw +
+                (1 - alpha) * depth_suavizado
+            )
+
+            depth = depth_suavizado
+
+            handedness = result.handedness[0][0].category_name
+
+            # Referencia: muñeca
+            x_base = hand[0].x
+            y_base = hand[0].y
+
+            features = []
+            landmarksTracking = []
+
+            for idx, landmark in enumerate(hand):
+
+                # Coordenadas relativas a la muñeca
+                x = landmark.x - x_base
+                y = landmark.y - y_base
+
+                # Mismo flip que en trainDataset.py
+                if handedness == "Left":
+                    x = -x
+
+                features.extend([x, y])
+
+                # Datos que se envían a Unity
+                if idx == 0 or idx == 9:
+
+                    landmarksTracking.extend([
+                        landmark.x,
+                        landmark.y,
+                        landmark.z
+                    ])
+
+            # Verificar las 42 características
+            X = np.array(
+                [features],
+                dtype=np.float32
+            )
+
+            tiempo_actual = time.perf_counter()
+
+
+            if tiempo_actual - ultimo_tiempo_clasificacion >= intervalo_clasificacion:
+
+                probabilities = model.predict_proba(X)[0]
+
+                ultima_prediccion = model.classes_[np.argmax(probabilities)]
+
+                ultimo_tiempo_clasificacion = tiempo_actual
+
+            prediction = ultima_prediccion
+
 
             probabilities = model.predict_proba(X)[0]
 
-            ultima_prediccion = model.classes_[np.argmax(probabilities)]
+            prediction = model.classes_[np.argmax(probabilities)]
 
-            ultimo_tiempo_clasificacion = tiempo_actual
+            confidence = np.max(probabilities)
 
-        prediction = ultima_prediccion
+            # Mostrar en pantalla
+            cv.putText(
+                frame,
+                f"Digito: {prediction}",
+                (30, 50),
+                cv.FONT_HERSHEY_SIMPLEX,
+                1.2,
+                (0, 255, 0),
+                3
+            )
 
+            cv.putText(
+                frame,
+                f"Confianza: {confidence * 100:.1f}%",
+                (30, 90),
+                cv.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 255, 0),
+                2
+            )
 
-        probabilities = model.predict_proba(X)[0]
+            # Enviar a Unity
+            message = (
+                str(prediction) + "|" +
+                str(landmarksTracking) + "|" +
+                str(float(depth))
+            )
 
-        prediction = model.classes_[np.argmax(probabilities)]
+            sock.sendto(
+                message.encode("utf-8"),
+                serverAddressPort
+            )
 
-        confidence = np.max(probabilities)
+        else:
 
-        # Mostrar en pantalla
-        cv.putText(
-            frame,
-            f"Digito: {prediction}",
-            (30, 50),
-            cv.FONT_HERSHEY_SIMPLEX,
-            1.2,
-            (0, 255, 0),
-            3
-        )
-
-        cv.putText(
-            frame,
-            f"Confianza: {confidence * 100:.1f}%",
-            (30, 90),
-            cv.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            (0, 255, 0),
-            2
-        )
-
-        # Enviar a Unity
-        message = (
-            str(prediction) + "|" +
-            str(landmarksTracking) + "|" +
-            str(float(depth))
-        )
-
-        sock.sendto(
-            message.encode("utf-8"),
-            serverAddressPort
-        )
-
-    else:
-
-        cv.putText(
-            frame,
-            "No se detecta mano",
-            (30, 50),
-            cv.FONT_HERSHEY_SIMPLEX,
-            1,
-            (0, 0, 255),
-            2
-        )
+            cv.putText(
+                frame,
+                "No se detecta mano",
+                (30, 50),
+                cv.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 0, 255),
+                2
+            )
 
 
 
-    cv.imshow("Digit Recognition", frame)
+        cv.imshow("Digit Recognition", frame)
 
 
-    # Q para salir
-    if cv.waitKey(1) & 0xFF == ord("q"):
-        break
+        # Q para salir
+        if cv.waitKey(1) & 0xFF == ord("q"):
+            break
+except Exception as e:
+
+    print(f"Error durante el seguimiento: {e}", flush=True)
+
+finally:
+
+    print("Cerrando sistema de seguimiento...", flush=True)
+
+    cap.release()
+    cv.destroyAllWindows()
+    sock.close()
+
+    try:
+        detector.close()
+    except Exception:
+        pass
+
+    print("Sistema cerrado correctamente", flush=True)
 
 
 # ============================================================

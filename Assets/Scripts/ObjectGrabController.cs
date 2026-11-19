@@ -7,14 +7,15 @@ public class ObjectGrabController : MonoBehaviour
     [Header("Referencias")]
     public UDPReceive udpReceive;
     public Camera camara;
+    public TextAnimationController controladorTexto;
 
     [Header("Configuración")]
-    public float tiempoParaAgarrar = 1f;
+    public float tiempoParaAgarrar = 2f;
     public float distanciaRaycast = 100f;
 
     [Header("Conexión física")]
-    public float tiempoParaConectar = 1f;
-    public float radioDeteccionConexion = 10f;
+    public float tiempoParaConectar = 3f;
+    public float radioDeteccionConexion = 2f;
 
     [Header("Estado")]
     public bool objetoAgarrado = false;
@@ -281,7 +282,6 @@ void AlinearObjetos(
 
 void Start()
 {
-    tiempoParaAgarrar = 3f;
     CrearIndicador();
 }
     void Update()
@@ -384,6 +384,7 @@ void Start()
             objetoActual = null;
             tiempoSobreObjeto = 0f;
             ActualizarOutline(null);
+            OcultarIndicador();
             return;
         }
 
@@ -392,6 +393,7 @@ void Start()
             objetoActual = objetoDetectado;
             tiempoSobreObjeto = 0f;
             ActualizarOutline(objetoActual);
+            OcultarIndicador();
         }
 
         tiempoSobreObjeto += Time.deltaTime;
@@ -459,6 +461,14 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
         ActualizarOutline(objeto);
 
         objetoAgarrado = true;
+
+        if (controladorTexto != null)
+        {
+            controladorTexto.MostrarMensajeUnaVez(
+                "objeto_agarrado",
+                "¡Ya lo tienes! Mueve tu objeto."
+            );
+        }
 
         offsetObjeto =
             objeto.transform.position - transform.position;
