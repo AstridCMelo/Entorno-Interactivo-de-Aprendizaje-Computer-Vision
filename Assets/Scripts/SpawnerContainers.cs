@@ -72,8 +72,8 @@ public class SpawnerContainers : MonoBehaviour
         if (SOButton.value == cubeOriginal.value && interaction == true)
         {
             Debug.Log("Trigguer");
-            controllerCube.SoltarObjeto();
-            SpawnArea.defaultlocation(cubeOriginal);
+            //controllerCube.SoltarObjeto();
+            //SpawnArea.defaultlocation(cubeOriginal);
             SpawnArea.SpawnCube(cubePrefab, SOButton);
         }
 

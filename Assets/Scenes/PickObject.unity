@@ -1805,11 +1805,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2137525295609256765, guid: 9f5f3f752a154354fbce2a60e84f5add, type: 3}
       propertyPath: m_Size.x
-      value: 2.770326
+      value: 2.6641502
       objectReference: {fileID: 0}
     - target: {fileID: 2137525295609256765, guid: 9f5f3f752a154354fbce2a60e84f5add, type: 3}
       propertyPath: m_Center.x
-      value: 1.0979402
+      value: 0.5706142
       objectReference: {fileID: 0}
     - target: {fileID: 2402774425212212146, guid: 9f5f3f752a154354fbce2a60e84f5add, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1882,6 +1882,10 @@ PrefabInstance:
     - target: {fileID: 8018927029009422963, guid: 9f5f3f752a154354fbce2a60e84f5add, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8369016773731115418, guid: 9f5f3f752a154354fbce2a60e84f5add, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.12
       objectReference: {fileID: 0}
     - target: {fileID: 8380187337552142395, guid: 9f5f3f752a154354fbce2a60e84f5add, type: 3}
       propertyPath: m_AnchoredPosition.y
