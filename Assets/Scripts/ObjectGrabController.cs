@@ -5,7 +5,8 @@ using UnityEngine.UI;
 public class ObjectGrabController : MonoBehaviour
 {
     [Header("Referencias")]
-    public UDPReceive udpReceive;
+    //public UDPReceive udpReceive;
+    UDPReceive udpReceive => UDPReceive.Instance;
     public Camera camara;
     public TextAnimationController controladorTexto;
 
@@ -53,8 +54,6 @@ public class ObjectGrabController : MonoBehaviour
     private Canvas canvasIndicador;
     private Image imagenProgreso;
     private Image puntoCursor;
-
-
 
 void CrearIndicador()
 {

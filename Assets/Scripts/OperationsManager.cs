@@ -92,7 +92,7 @@ public class OperationsManager : MonoBehaviour
             WinMessage();
             Debug.Log("Suma resuelta");
             level1 = true;
-            StartCoroutine(ReiniciarConEspera(1f));
+            StartCoroutine(ReiniciarConEspera(10f));
         }
     }
 

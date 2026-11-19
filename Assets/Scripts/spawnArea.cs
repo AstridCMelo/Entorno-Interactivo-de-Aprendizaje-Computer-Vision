@@ -7,8 +7,8 @@ public class spawnArea : MonoBehaviour
 {
     public readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
 
-    protected int colGrid = 5;
-    protected int rowGrid = 2;
+    protected int colGrid = 4;
+    protected int rowGrid = 5;
     protected float offset = 1f;
 
     Transform transformTrigger;
@@ -55,15 +55,15 @@ public class spawnArea : MonoBehaviour
             locate(cube);
             Debug.Log("Cantidad en lista: " + cubeGrid.Count);
        }
-       
     }
-    public void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerExit(Collider other)
     {
         //Debug.Log("Objeto del trigger: " + other.name);
         int grabCube = cubeGrid.IndexOf(other.GetComponent<InteractableObject>());
 
-        if (grabCube >= 0)
+        if (grabCube >= 0 && other.CompareTag("SpawnedCube"))
         {
+            Debug.Log("Objeto eliminado");
             cubeGrid.RemoveAt(grabCube);
             for (int i = grabCube; i < cubeGrid.Count; i++)
             {

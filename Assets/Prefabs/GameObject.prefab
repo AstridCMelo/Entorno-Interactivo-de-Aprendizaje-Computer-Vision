@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1088390098268210509}
   - component: {fileID: 9068526714480482728}
   - component: {fileID: 7504811443239805179}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Cube
   m_TagString: InteractCube
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   - component: {fileID: 5181368608266687815}
   - component: {fileID: 7430661217270765390}
   - component: {fileID: 5677949198203078055}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GameObject
   m_TagString: SpawnedCube
   m_Icon: {fileID: 0}
