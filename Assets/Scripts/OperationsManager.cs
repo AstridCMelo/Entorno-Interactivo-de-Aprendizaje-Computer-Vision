@@ -1,5 +1,8 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class OperationsManager : MonoBehaviour
@@ -14,6 +17,9 @@ public class OperationsManager : MonoBehaviour
     public int resultado;
     public string operador;
 
+    public static bool level1 = false;
+    public static bool level2 = false;
+
     private void Awake()
     {
         Instance = this;
@@ -21,7 +27,27 @@ public class OperationsManager : MonoBehaviour
 
     private void Start()
     {
-        Suma();
+        ChangeLevel();
+    }
+
+    private void ChangeLevel()
+    {
+        if (level1 == false)
+        {
+            Suma2();
+        }
+        else
+        {
+            Suma3();
+        }
+    }
+
+    void Update()
+    {
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            StartCoroutine(ReiniciarConEspera(1f));
+        }
     }
 
     void UpdateInterface()
@@ -39,7 +65,7 @@ public class OperationsManager : MonoBehaviour
         return UnityEngine.Random.Range(min, max + 1);
     }
 
-    void Suma()
+    void Suma2()
     {
         num1 = Random(1,49);
         num2 = Random(1,49);
@@ -54,18 +80,28 @@ public class OperationsManager : MonoBehaviour
         resultado = num1 + num2;
     }
 
-    void Resta()
+    void Suma3()
     {
-        operador = " - ";
+
     }
 
-    public void VerifyOperation()
+    public void VerifyOperationSuma2()
     {
         if(containers[0].right == true && containers[1].right == true)
         {
             WinMessage();
             Debug.Log("Suma resuelta");
+            level1 = true;
+            StartCoroutine(ReiniciarConEspera(1f));
         }
+    }
+
+    IEnumerator ReiniciarConEspera(float segundos)
+    {
+        yield return new WaitForSeconds(segundos);
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }

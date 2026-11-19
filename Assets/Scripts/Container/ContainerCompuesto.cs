@@ -17,7 +17,7 @@ public class ContainerCompuesto : MonoBehaviour
         {
             Debug.Log("El sumando es correcto");
             right = true;
-            OperationsManager.Instance.VerifyOperation();
+            OperationsManager.Instance.VerifyOperationSuma2();
         }
 
     }
