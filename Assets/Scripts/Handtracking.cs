@@ -4,12 +4,16 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
+
+
 public class HandTracking : MonoBehaviour
 {
     private UdpClient udpClient;
     private Thread receiveThread;
 
     private bool running = true;
+
+    
 
     void Start()
     {
