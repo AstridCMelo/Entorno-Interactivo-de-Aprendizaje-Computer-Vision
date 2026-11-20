@@ -11,18 +11,18 @@ public class InteractableObject : MonoBehaviour
 
 
     private Vector3 posicionInicial;
-private Quaternion rotacionInicial;
-private Transform padreInicial;
-private Rigidbody rb;
+    private Quaternion rotacionInicial;
+    private Transform padreInicial;
+    private Rigidbody rb;
 
-public bool generadoDuranteJuego = false;
+    public bool generadoDuranteJuego = false;
 
 private void Start()
 {
-    posicionInicial = transform.position;
-    rotacionInicial = transform.rotation;
-    padreInicial = transform.parent;
-    rb = GetComponent<Rigidbody>();
+    //posicionInicial = transform.position;
+    //rotacionInicial = transform.rotation;
+    //padreInicial = transform.parent;
+    //rb = GetComponent<Rigidbody>();
 }
 
 public void ReiniciarObjeto()
@@ -35,8 +35,8 @@ public void ReiniciarObjeto()
     }
 
     transform.SetParent(padreInicial);
-    transform.position = posicionInicial;
-    transform.rotation = rotacionInicial;
+    transform.localPosition = posicionInicial;
+    transform.localRotation = rotacionInicial;
 
     if (rb != null)
     {
@@ -47,6 +47,10 @@ public void ReiniciarObjeto()
 
     public void Awake()
     {
+        posicionInicial = transform.localPosition;
+        rotacionInicial = transform.localRotation;
+        padreInicial = transform.parent;
+        rb = GetComponent<Rigidbody>();
         rendererCube = GetComponentInChildren<Renderer>();
         ChangeMat();
     }

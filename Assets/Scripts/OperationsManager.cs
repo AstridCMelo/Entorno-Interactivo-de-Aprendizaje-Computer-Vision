@@ -16,13 +16,15 @@ public class OperationsManager : MonoBehaviour
     public int num2;
     public int resultado;
     public string operador;
+    public spawnArea areacreation;
+
 
     public static bool level1 = false;
     public static bool level2 = false;
 
     [Header("Reinicio del minijuego")]
 public ObjectGrabController controllerCube;
-public bool operacionesHabilitadas = true;
+public bool operacionesHabilitadas = false;
 
 private bool esperandoSiguienteOperacion = false;
 
@@ -59,12 +61,13 @@ private bool esperandoSiguienteOperacion = false;
 
     void Update()
 {
-    if (!operacionesHabilitadas)
-        return;
+    //if (!operacionesHabilitadas)
+        //return;
 
     if (Keyboard.current != null &&
         Keyboard.current.spaceKey.wasPressedThisFrame)
     {
+        esperandoSiguienteOperacion = true;
         StartCoroutine(ReiniciarConEspera(1f));
     }
 }
@@ -102,8 +105,8 @@ void GenerarNuevaOperacion()
 
     public void VerifyOperationSuma2()
 {
-    if (!operacionesHabilitadas || esperandoSiguienteOperacion)
-        return;
+    //if (!operacionesHabilitadas || esperandoSiguienteOperacion)
+        //return;
 
     if (containers[0].right && containers[1].right)
     {
@@ -111,7 +114,7 @@ void GenerarNuevaOperacion()
 
         WinMessage();
         Debug.Log("Suma resuelta");
-         MostrarMensaje(
+        MostrarMensaje(
                     "suma_resuelta",
                     "¡Muy bien hecho!"
                 );
@@ -172,6 +175,8 @@ public void ReiniciarMinijuego()
             cubo.ReiniciarObjeto();
         }
     }
+
+    areacreation.cubeGrid.Clear();
 
     // 5. Generar una nueva operación
     ChangeLevel();
