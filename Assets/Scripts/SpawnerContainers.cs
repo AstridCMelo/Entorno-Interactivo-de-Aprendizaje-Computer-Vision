@@ -7,7 +7,7 @@ public class SpawnerContainers : MonoBehaviour
 {
     [SerializeField] private SpawnerContainer SOButton;
     [SerializeField] private InteractableObject cubePrefab;
-    [SerializeField] private float timeInteraction = 2f;
+    [SerializeField] private float timeInteraction = 1f;
     [SerializeField] private spawnArea SpawnArea;
 
     [SerializeField] private Renderer matButton;
@@ -15,9 +15,27 @@ public class SpawnerContainers : MonoBehaviour
 
     [SerializeField] private TextButton buttonText;
 
+
     private bool interaction = false;
 
     public ObjectGrabController controllerCube;
+
+     public TextAnimationController controladorTexto;
+
+
+      void MostrarMensaje(string id, string mensaje)
+    {
+        if (controladorTexto != null)
+        {
+            controladorTexto.MostrarMensajeUnaVez(id, mensaje);
+        }
+    }
+
+    bool DialogoTerminado()
+    {
+        return controladorTexto == null ||
+               !controladorTexto.EstaProcesandoCola;
+    }
 
     private void Awake()
     {
@@ -30,25 +48,34 @@ public class SpawnerContainers : MonoBehaviour
 
     private void Update()
     {
-       if(controllerCube.getObjetoMano() != null && (interaction == false))
-       {
+        if (controllerCube.getObjetoMano() != null && !interaction)
+        {
             SOButton = controllerCube.getObjetoMano();
+
             matButton.material = SOButton.NormalmaterialBoton;
             buttonText.ExtractName(SOButton.value);
-       }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other == null) return;
 
-        if(other.CompareTag("SpawnedCube"))
+        if (other.CompareTag("SpawnedCube"))
         {
             var cubeOriginal = other.GetComponent<InteractableObject>();
-            if (SOButton.value == cubeOriginal.value)
+
+            if (cubeOriginal != null && SOButton != null &&
+                SOButton.value == cubeOriginal.value && !interaction)
             {
                 interaction = true;
                 StartCoroutine(Timer(cubeOriginal));
+
+                MostrarMensaje(
+                    "respuesta_botonSpawner",
+                    "¡Mira cuantas cajas!"
+                );
+
             }
         }
     }
@@ -57,27 +84,52 @@ public class SpawnerContainers : MonoBehaviour
     {
         if (other == null) return;
 
-        var cubeOriginal = other.GetComponent<InteractableObject>();
-        
-        StopAllCoroutines();
-        interaction = false;
+        if (other.CompareTag("SpawnedCube"))
+        {
+            StopAllCoroutines();
+
+            interaction = false;
+
+            if (SOButton != null)
+                matButton.material = SOButton.NormalmaterialBoton;
+
+                MostrarMensaje(
+                    "containers",
+                    "Pon las cajas en los contenedores"
+                );
+        }
     }
+
+    
 
     IEnumerator Timer(InteractableObject cubeOriginal)
     {
         interaction = true;
         matButton.material = hoverMaterial;
-        yield return new WaitForSeconds(timeInteraction);
 
-        if (SOButton.value == cubeOriginal.value && interaction == true)
+        while (interaction && cubeOriginal != null)
         {
-            Debug.Log("Trigguer");
-            controllerCube.SoltarObjeto();
-            SpawnArea.defaultlocation(cubeOriginal);
-            SpawnArea.SpawnCube(cubePrefab, SOButton);
+            // Espera el tiempo configurado
+            yield return new WaitForSeconds(timeInteraction);
+
+            // Verifica que la interacción siga activa
+            if (interaction && cubeOriginal != null &&
+                SOButton != null &&
+                SOButton.value == cubeOriginal.value)
+            {
+                Debug.Log("Spawn repetido");
+
+                SpawnArea.SpawnCube(cubePrefab, SOButton);
+            }
+            else
+            {
+                break;
+            }
         }
 
-        matButton.material = SOButton.NormalmaterialBoton;
-    }
+        interaction = false;
 
+        if (SOButton != null)
+            matButton.material = SOButton.NormalmaterialBoton;
+    }
 }

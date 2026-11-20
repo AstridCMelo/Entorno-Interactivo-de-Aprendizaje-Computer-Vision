@@ -5,16 +5,18 @@ using UnityEngine.UI;
 public class ObjectGrabController : MonoBehaviour
 {
     [Header("Referencias")]
-    public UDPReceive udpReceive;
+    //public UDPReceive udpReceive;
+    UDPReceive udpReceive => UDPReceive.Instance;
     public Camera camara;
+    public TextAnimationController controladorTexto;
 
     [Header("Configuración")]
-    public float tiempoParaAgarrar = 1f;
+    public float tiempoParaAgarrar = 2f;
     public float distanciaRaycast = 100f;
 
     [Header("Conexión física")]
-    public float tiempoParaConectar = 1f;
-    public float radioDeteccionConexion = 10f;
+    public float tiempoParaConectar = 3f;
+    public float radioDeteccionConexion = 2f;
 
     [Header("Estado")]
     public bool objetoAgarrado = false;
@@ -54,6 +56,7 @@ public class ObjectGrabController : MonoBehaviour
     private Image puntoCursor;
 
 
+    
 
 void CrearIndicador()
 {
@@ -281,7 +284,6 @@ void AlinearObjetos(
 
 void Start()
 {
-    tiempoParaAgarrar = 3f;
     CrearIndicador();
 }
     void Update()
@@ -384,6 +386,7 @@ void Start()
             objetoActual = null;
             tiempoSobreObjeto = 0f;
             ActualizarOutline(null);
+            OcultarIndicador();
             return;
         }
 
@@ -392,6 +395,7 @@ void Start()
             objetoActual = objetoDetectado;
             tiempoSobreObjeto = 0f;
             ActualizarOutline(objetoActual);
+            OcultarIndicador();
         }
 
         tiempoSobreObjeto += Time.deltaTime;
@@ -459,6 +463,19 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
         ActualizarOutline(objeto);
 
         objetoAgarrado = true;
+
+        if (controladorTexto != null)
+        {
+            controladorTexto.MostrarMensajeUnaVez(
+                "objeto_agarrado",
+                "¡Ya lo tienes!"
+            );
+
+            controladorTexto.MostrarMensajeUnaVez(
+                "boton_spawn",
+                "Ves ese boton arriba...Pasa el objeto por encima"
+            );
+        }
 
         offsetObjeto =
             objeto.transform.position - transform.position;
@@ -708,4 +725,22 @@ void ComprobarConexion()
 
         return null;
     }
+
+
+    public void ReiniciarAgarre()
+{
+    if (objetoAgarrado)
+        SoltarObjeto();
+
+    objetoActual = null;
+    objetoEnMano = null;
+    objetoDebajo = null;
+
+    tiempoSobreObjeto = 0f;
+    tiempoSobreConexion = 0f;
+
+    ReiniciarConexion();
+    ActualizarOutline(null);
+    OcultarIndicador();
+}
 }

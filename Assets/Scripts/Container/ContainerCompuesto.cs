@@ -8,7 +8,7 @@ public class ContainerCompuesto : MonoBehaviour
     public Container cont1;
     public Container cont2;
 
-
+    public Material rightMat;
     public void VerifyNumber()
     {
         int currentResult = cont1.numOperation + cont2.numOperation;
@@ -17,9 +17,30 @@ public class ContainerCompuesto : MonoBehaviour
         {
             Debug.Log("El sumando es correcto");
             right = true;
-            OperationsManager.Instance.VerifyOperation();
-        }
+            OperationsManager.Instance.VerifyOperationSuma2();
 
+            changeMaterialRight(cont1);
+            changeMaterialRight(cont2);
+        }
+        else
+        {
+            right = false;
+
+            changeMaterialFail(cont1);
+            changeMaterialFail(cont2);
+        }
+    }
+
+    public void changeMaterialRight(Container objeto)
+    {
+        Renderer renderer = objeto.GetComponentInParent<Renderer>();
+        renderer.material = rightMat;
+    }
+
+    public void changeMaterialFail(Container objeto)
+    {
+        Renderer renderer = objeto.GetComponentInParent<Renderer>();
+        renderer.material = objeto.SOButton.NormalmaterialBoton;
     }
 
     //public void Relocate(Transform transform1, Transform transform2)
@@ -27,4 +48,15 @@ public class ContainerCompuesto : MonoBehaviour
     //    cont1.RelocatetoResult(transform1);
     //    cont2.RelocatetoResult(transform2);
     //}
+
+    public void ReiniciarContenedorCompuesto()
+    {
+        right = false;
+
+        if (cont1 != null)
+            cont1.ReiniciarContenedor();
+
+        if (cont2 != null)
+            cont2.ReiniciarContenedor();
+    }
 }

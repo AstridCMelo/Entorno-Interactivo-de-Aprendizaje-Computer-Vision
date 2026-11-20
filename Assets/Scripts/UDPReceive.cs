@@ -9,6 +9,8 @@ using System.Globalization;
 
 public class UDPReceive : MonoBehaviour
 {
+    public static UDPReceive Instance;
+
     Thread receiveThread;
     UdpClient client;
 
@@ -25,6 +27,18 @@ public class UDPReceive : MonoBehaviour
     public float dataDepth = 0f;
 
     private bool running = true;
+
+    void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
     void Start()
     {
