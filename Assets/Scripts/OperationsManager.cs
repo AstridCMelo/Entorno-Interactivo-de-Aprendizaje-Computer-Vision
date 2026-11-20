@@ -105,8 +105,8 @@ void GenerarNuevaOperacion()
 
     public void VerifyOperationSuma2()
 {
-    //if (!operacionesHabilitadas || esperandoSiguienteOperacion)
-        //return;
+    if (!operacionesHabilitadas || esperandoSiguienteOperacion)
+        return;
 
     if (containers[0].right && containers[1].right)
     {

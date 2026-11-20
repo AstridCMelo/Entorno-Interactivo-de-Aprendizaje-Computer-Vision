@@ -216,6 +216,7 @@ private Quaternion rotacionInicialCamara;
             case EstadoTutorial.EsperandoDialogoFinal:
 
                 estadoActual = EstadoTutorial.Completado;
+                OperationsManager.Instance.operacionesHabilitadas = true;
 
                 Debug.Log("Tutorial de movimientos completado.");
                 break;
