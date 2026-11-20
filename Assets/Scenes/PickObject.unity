@@ -2647,8 +2647,9 @@ MonoBehaviour:
   num2: 0
   resultado: 0
   operador: 
-  controllerCube: {fileID: 0}
+  controllerCube: {fileID: 1486097162}
   operacionesHabilitadas: 0
+  controladorTexto: {fileID: 594438185}
 --- !u!4 &1916404642
 Transform:
   m_ObjectHideFlags: 0

@@ -72,8 +72,8 @@ public class SpawnerContainers : MonoBehaviour
                 StartCoroutine(Timer(cubeOriginal));
 
                 MostrarMensaje(
-                    "interactua_botonSpawner",
-                    "Espera"
+                    "respuesta_botonSpawner",
+                    "¡Mira cuantas cajas!"
                 );
 
             }
@@ -94,11 +94,13 @@ public class SpawnerContainers : MonoBehaviour
                 matButton.material = SOButton.NormalmaterialBoton;
 
                 MostrarMensaje(
-                    "respuesta_botonSpawner",
-                    "¡Mira cuantas cajas!"
+                    "containers",
+                    "Pon las cajas en los contenedores"
                 );
         }
     }
+
+    
 
     IEnumerator Timer(InteractableObject cubeOriginal)
     {

@@ -63,6 +63,14 @@ public class Container : spawnArea
                 "contenedor_correcto",
                 "Exacto, ese va ahi"
                 );
+
+
+                MostrarMensaje(
+                "sumatoria",
+                "Ves arriba, trata de hacer esa suma"
+                );
+
+
                 numOperation = cubeGrid.Count * SOButton.value;
                 Debug.Log(numOperation);
                 contenedor.VerifyNumber();

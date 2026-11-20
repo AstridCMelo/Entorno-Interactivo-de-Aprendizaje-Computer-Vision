@@ -13,7 +13,7 @@ public class Tutorial : MonoBehaviour
         {
             controladorTexto.MostrarMensajeUnaVez(
                 "bienvenida",
-                "¡Hola! Bienvenido a Fibonny, saluda a la camara"
+                "¡Hola! Bienvenido a Fibonny"
             );
         }
         else

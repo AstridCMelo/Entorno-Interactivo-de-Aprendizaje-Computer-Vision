@@ -22,9 +22,25 @@ public class OperationsManager : MonoBehaviour
 
     [Header("Reinicio del minijuego")]
 public ObjectGrabController controllerCube;
-public bool operacionesHabilitadas = false;
+public bool operacionesHabilitadas = true;
 
 private bool esperandoSiguienteOperacion = false;
+
+  public TextAnimationController controladorTexto;
+
+       void MostrarMensaje(string id, string mensaje)
+    {
+        if (controladorTexto != null)
+        {
+            controladorTexto.MostrarMensajeUnaVez(id, mensaje);
+        }
+    }
+
+    bool DialogoTerminado()
+    {
+        return controladorTexto == null ||
+               !controladorTexto.EstaProcesandoCola;
+    }
 
     private void Awake()
     {
@@ -37,16 +53,9 @@ private bool esperandoSiguienteOperacion = false;
     }
 
     private void ChangeLevel()
-    {
-        if (level1 == false)
-        {
-            Suma2();
-        }
-        else
-        {
-            Suma3();
-        }
-    }
+{
+    GenerarNuevaOperacion();
+}
 
     void Update()
 {
@@ -74,37 +83,21 @@ private bool esperandoSiguienteOperacion = false;
     {
         return UnityEngine.Random.Range(min, max + 1);
     }
-
-    void Suma2()
-    {
-        num1 = Random(1,49);
-        num2 = Random(1,49);
-
-        containers[0].containerRight = num1;
-        containers[1].containerRight = num2;
-
-        operador = " + ";
-
-        UpdateInterface();
-
-        resultado = num1 + num2;
-    }
-
-    void Suma3()
+void GenerarNuevaOperacion()
 {
     num1 = Random(1, 49);
     num2 = Random(1, 49);
 
-    containers[0].containerRight = num1;
-    containers[1].containerRight = num2;
-
     operador = " + ";
-
-    UpdateInterface();
 
     resultado = num1 + num2;
 
-    Debug.Log("Nueva operación de nivel 2");
+    containers[0].containerRight = num1;
+    containers[1].containerRight = num2;
+
+    UpdateInterface();
+
+    Debug.Log("Nueva operación: " + num1 + operador + num2);
 }
 
     public void VerifyOperationSuma2()
@@ -118,8 +111,10 @@ private bool esperandoSiguienteOperacion = false;
 
         WinMessage();
         Debug.Log("Suma resuelta");
-
-        level1 = true;
+         MostrarMensaje(
+                    "suma_resuelta",
+                    "¡Muy bien hecho!"
+                );
 
         StartCoroutine(ReiniciarConEspera(10f));
     }
