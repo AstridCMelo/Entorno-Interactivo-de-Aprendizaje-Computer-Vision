@@ -9,6 +9,42 @@ public class InteractableObject : MonoBehaviour
     public int value = 1;
     private Renderer rendererCube;
 
+
+    private Vector3 posicionInicial;
+private Quaternion rotacionInicial;
+private Transform padreInicial;
+private Rigidbody rb;
+
+public bool generadoDuranteJuego = false;
+
+private void Start()
+{
+    posicionInicial = transform.position;
+    rotacionInicial = transform.rotation;
+    padreInicial = transform.parent;
+    rb = GetComponent<Rigidbody>();
+}
+
+public void ReiniciarObjeto()
+{
+    if (rb != null)
+    {
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+    }
+
+    transform.SetParent(padreInicial);
+    transform.position = posicionInicial;
+    transform.rotation = rotacionInicial;
+
+    if (rb != null)
+    {
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+}
+
     public void Awake()
     {
         rendererCube = GetComponentInChildren<Renderer>();

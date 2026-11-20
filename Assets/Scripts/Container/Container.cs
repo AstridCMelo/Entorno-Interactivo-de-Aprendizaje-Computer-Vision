@@ -13,6 +13,25 @@ public class Container : spawnArea
     public ObjectGrabController controllerCube;
 
     public Transform transformDefault;
+
+    
+    [Header("Mensajes")]
+    public TextAnimationController controladorTexto;
+
+      void MostrarMensaje(string id, string mensaje)
+    {
+        if (controladorTexto != null)
+        {
+            controladorTexto.MostrarMensajeUnaVez(id, mensaje);
+        }
+    }
+
+    bool DialogoTerminado()
+    {
+        return controladorTexto == null ||
+               !controladorTexto.EstaProcesandoCola;
+    }
+
     private void Awake()
     {
         colGrid = 2;
@@ -40,6 +59,10 @@ public class Container : spawnArea
             {
                 locate(cube);
                 Debug.Log("Cantidad en lista: " + cubeGrid.Count);
+                MostrarMensaje(
+                "contenedor_correcto",
+                "Exacto, ese va ahi"
+                );
                 numOperation = cubeGrid.Count * SOButton.value;
                 Debug.Log(numOperation);
                 contenedor.VerifyNumber();
@@ -48,6 +71,10 @@ public class Container : spawnArea
             {
                 //Se devuelve el objeto al spawn area
                 cube.transform.position = new Vector3(transformDefault.position.x, transformDefault.position.y, transformDefault.position.z);
+                MostrarMensaje(
+                "contenedor_incorrecto",
+                "Nop, ese no va ahi"
+                );
             }
         }
    
@@ -60,6 +87,24 @@ public class Container : spawnArea
         Debug.Log(numOperation);
         contenedor.VerifyNumber();
 
+    }
+
+
+        public void ReiniciarContenedor()
+    {
+        cubeGrid.Clear();
+        numOperation = 0;
+
+        if (contenedor != null)
+            contenedor.right = false;
+
+        if (SOButton != null && SOButton.NormalmaterialBoton != null)
+        {
+            Renderer r = GetComponentInParent<Renderer>();
+
+            if (r != null)
+                r.material = SOButton.NormalmaterialBoton;
+        }
     }
 
 }

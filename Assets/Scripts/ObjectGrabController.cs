@@ -55,6 +55,9 @@ public class ObjectGrabController : MonoBehaviour
     private Image imagenProgreso;
     private Image puntoCursor;
 
+
+    
+
 void CrearIndicador()
 {
     // Canvas que siempre se dibuja por encima de la escena.
@@ -465,7 +468,12 @@ if (tiempoSobreObjeto >= tiempoParaAgarrar)
         {
             controladorTexto.MostrarMensajeUnaVez(
                 "objeto_agarrado",
-                "¡Ya lo tienes! Mueve tu objeto."
+                "¡Ya lo tienes!"
+            );
+
+            controladorTexto.MostrarMensajeUnaVez(
+                "boton_spawn",
+                "Ves ese boton arriba...Pasa el objeto por encima"
             );
         }
 
@@ -717,4 +725,22 @@ void ComprobarConexion()
 
         return null;
     }
+
+
+    public void ReiniciarAgarre()
+{
+    if (objetoAgarrado)
+        SoltarObjeto();
+
+    objetoActual = null;
+    objetoEnMano = null;
+    objetoDebajo = null;
+
+    tiempoSobreObjeto = 0f;
+    tiempoSobreConexion = 0f;
+
+    ReiniciarConexion();
+    ActualizarOutline(null);
+    OcultarIndicador();
+}
 }

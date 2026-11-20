@@ -11,7 +11,7 @@ public class TextAnimationController : MonoBehaviour
 
     [Header("Animación")]
     public float duracionAnimacion = 0.3f;
-    public float tiempoVisible = 6f;
+    public float tiempoVisible = 8f;
 
     private Vector3 escalaOriginal;
 

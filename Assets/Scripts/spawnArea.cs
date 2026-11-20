@@ -7,6 +7,7 @@ public class spawnArea : MonoBehaviour
 {
     public readonly List<InteractableObject> cubeGrid = new List<InteractableObject>();
 
+
     protected int colGrid = 4;
     protected int rowGrid = 5;
     protected float offset = 1f;
@@ -18,6 +19,7 @@ public class spawnArea : MonoBehaviour
         if (cubeGrid.Count < colGrid * rowGrid)
         {
             var cube2 = Instantiate(cubePrefab);
+            cube2.generadoDuranteJuego = true;
             cube2.SOButton = SOButton;
             cube2.ChangeMat();
 

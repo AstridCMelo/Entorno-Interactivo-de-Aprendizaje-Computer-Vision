@@ -48,4 +48,15 @@ public class ContainerCompuesto : MonoBehaviour
     //    cont1.RelocatetoResult(transform1);
     //    cont2.RelocatetoResult(transform2);
     //}
+
+    public void ReiniciarContenedorCompuesto()
+    {
+        right = false;
+
+        if (cont1 != null)
+            cont1.ReiniciarContenedor();
+
+        if (cont2 != null)
+            cont2.ReiniciarContenedor();
+    }
 }

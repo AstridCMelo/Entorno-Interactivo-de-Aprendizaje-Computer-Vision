@@ -149,33 +149,27 @@ reportar_progreso(100, "Sistema listo")
 # CONFIGURACIÓN DE VENTANA DE CÁMARA
 # ============================================================
 
-nombre_ventana = "Digit Recognition"
+#nombre_ventana = "Digit Recognition"
 
-ancho_ventana = 400
-alto_ventana = 300
-margen = 20
+#ancho_ventana = 400
+#alto_ventana = 300
+#margen = 20
 
-cv.namedWindow(nombre_ventana, cv.WINDOW_NORMAL)
+#cv.namedWindow(nombre_ventana, cv.WINDOW_NORMAL)
 
-cv.resizeWindow(
-    nombre_ventana,
-    ancho_ventana,
-    alto_ventana
-)
+#cv.resizeWindow(nombre_ventana,ancho_ventana,alto_ventana)
 
 # Obtener resolución real de la pantalla de Windows
-ancho_pantalla = ctypes.windll.user32.GetSystemMetrics(0)
-alto_pantalla = ctypes.windll.user32.GetSystemMetrics(1)
+#ancho_pantalla = ctypes.windll.user32.GetSystemMetrics(0)
+#alto_pantalla = ctypes.windll.user32.GetSystemMetrics(1)
 
 # Calcular posición inferior derecha
-posicion_x = ancho_pantalla - ancho_ventana - margen
-posicion_y = alto_pantalla - alto_ventana - margen - 40
+#posicion_x = ancho_pantalla - ancho_ventana - margen
+#posicion_y = alto_pantalla - alto_ventana - margen - 40
 
-cv.moveWindow(
-    nombre_ventana,
-    posicion_x,
-    posicion_y
-)
+#cv.moveWindow(   nombre_ventana,posicion_x, posicion_y)
+
+
 try:
     while cap.isOpened():
 
@@ -365,12 +359,12 @@ try:
 
 
 
-        cv.imshow("Digit Recognition", frame)
+        #cv.imshow("Digit Recognition", frame)
 
 
         # Q para salir
-        if cv.waitKey(1) & 0xFF == ord("q"):
-            break
+        #if cv.waitKey(1) & 0xFF == ord("q"):
+        #    break
 except Exception as e:
 
     print(f"Error durante el seguimiento: {e}", flush=True)
